@@ -1,24 +1,107 @@
+import VerificationModal from "@/components/VerificationModal";
+import { images } from "@/constants/images";
+import { useSignUp, useSSO } from "@clerk/expo";
+import { AntDesign, FontAwesome, Ionicons } from "@expo/vector-icons";
+import * as Linking from "expo-linking";
+import { router } from "expo-router";
+import * as WebBrowser from "expo-web-browser";
+import { useState } from "react";
 import {
-  Image,
-  ScrollView,
-  StyleSheet,
-  Text,
-  TextInput,
-  TouchableOpacity,
-  View,
+    Alert,
+    Image,
+    ScrollView,
+    StyleSheet,
+    Text,
+    TextInput,
+    TouchableOpacity,
+    View,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { useState } from "react";
-import { router } from "expo-router";
-import { AntDesign, FontAwesome, Ionicons } from "@expo/vector-icons";
-import { images } from "@/constants/images";
-import VerificationModal from "@/components/VerificationModal";
+
+WebBrowser.maybeCompleteAuthSession();
 
 export default function SignUpScreen() {
+  const { signUp, fetchStatus } = useSignUp();
+  const { startSSOFlow } = useSSO();
+
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [showModal, setShowModal] = useState(false);
+
+  function isValidEmail(value: string) {
+    return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value);
+  }
+
+  async function handleSignUp() {
+    if (!email.trim() || !password) {
+      Alert.alert("Complete your info", "Please enter both email and password.");
+      return;
+    }
+
+    if (!isValidEmail(email)) {
+      Alert.alert("Invalid email", "Please enter a valid email address.");
+      return;
+    }
+
+    if (password.length < 8) {
+      Alert.alert("Weak password", "Password must be at least 8 characters.");
+      return;
+    }
+
+    const { error } = await signUp.password({ emailAddress: email, password });
+
+    if (error) {
+      Alert.alert("Unable to sign up", error.message || "Something went wrong. Please try again.");
+      return;
+    }
+
+    const { error: sendError } = await signUp.verifications.sendEmailCode();
+
+    if (sendError) {
+      Alert.alert("Error", sendError.message || "Could not send verification email.");
+      return;
+    }
+
+    setShowModal(true);
+  }
+
+  async function handleVerify(code: string) {
+    const { error } = await signUp.verifications.verifyEmailCode({ code });
+
+    if (error) {
+      Alert.alert("Invalid code", error.message || "The code you entered is incorrect. Please try again.");
+      throw error;
+    }
+
+    if (signUp.status === "complete") {
+      await signUp.finalize({
+        navigate: ({ session }) => {
+          if (session?.currentTask) return;
+          router.replace("/");
+        },
+      });
+    } else {
+      Alert.alert("Verification failed", "Please try again.");
+      throw new Error("Sign-up not complete");
+    }
+  }
+
+  async function handleSocialSignUp(strategy: "oauth_google" | "oauth_facebook" | "oauth_apple") {
+    try {
+      const { createdSessionId, setActive } = await startSSOFlow({
+        strategy,
+        redirectUrl: Linking.createURL("oauth-callback"),
+      });
+
+      if (createdSessionId && setActive) {
+        await setActive({ session: createdSessionId });
+        router.replace("/");
+      }
+    } catch {
+      Alert.alert("Sign up failed", "Could not complete social sign-up. Please try again.");
+    }
+  }
 
   return (
     <SafeAreaView style={styles.safe}>
@@ -69,7 +152,9 @@ export default function SignUpScreen() {
         {/* Password input */}
         <View style={[styles.inputCard, styles.inputCardRow]}>
           <View style={{ flex: 1 }}>
-            <Text className="font-poppins text-body-sm text-muted">Password</Text>
+            <Text className="font-poppins text-body-sm text-muted">
+              Password
+            </Text>
             <TextInput
               value={password}
               onChangeText={setPassword}
@@ -94,38 +179,64 @@ export default function SignUpScreen() {
 
         {/* Sign Up button */}
         <TouchableOpacity
-          onPress={() => setShowModal(true)}
+          onPress={handleSignUp}
           style={styles.primaryBtn}
           activeOpacity={0.85}
+          disabled={fetchStatus === "fetching"}
         >
-          <Text className="font-poppins-semibold text-body-lg text-white">Sign Up</Text>
+          <Text className="font-poppins-semibold text-body-lg text-white">
+            Sign Up
+          </Text>
         </TouchableOpacity>
 
         {/* Divider */}
         <View style={styles.divider}>
           <View style={styles.dividerLine} />
-          <Text className="font-poppins text-body-sm text-muted mx-3">or continue with</Text>
+          <Text className="font-poppins text-body-sm text-muted mx-3">
+            or continue with
+          </Text>
           <View style={styles.dividerLine} />
         </View>
 
         {/* Social buttons */}
-        <TouchableOpacity style={styles.socialBtn} activeOpacity={0.8}>
+        <TouchableOpacity
+          onPress={() => handleSocialSignUp("oauth_google")}
+          style={styles.socialBtn}
+          activeOpacity={0.8}
+        >
           <AntDesign name="google" size={20} color="#EA4335" />
-          <Text className="font-poppins-medium text-body-md text-ink" style={styles.socialText}>
+          <Text
+            className="font-poppins-medium text-body-md text-ink"
+            style={styles.socialText}
+          >
             Continue with Google
           </Text>
         </TouchableOpacity>
 
-        <TouchableOpacity style={styles.socialBtn} activeOpacity={0.8}>
+        <TouchableOpacity
+          onPress={() => handleSocialSignUp("oauth_facebook")}
+          style={styles.socialBtn}
+          activeOpacity={0.8}
+        >
           <FontAwesome name="facebook-square" size={22} color="#1877F2" />
-          <Text className="font-poppins-medium text-body-md text-ink" style={styles.socialText}>
+          <Text
+            className="font-poppins-medium text-body-md text-ink"
+            style={styles.socialText}
+          >
             Continue with Facebook
           </Text>
         </TouchableOpacity>
 
-        <TouchableOpacity style={styles.socialBtn} activeOpacity={0.8}>
+        <TouchableOpacity
+          onPress={() => handleSocialSignUp("oauth_apple")}
+          style={styles.socialBtn}
+          activeOpacity={0.8}
+        >
           <AntDesign name="apple1" size={22} color="#000000" />
-          <Text className="font-poppins-medium text-body-md text-ink" style={styles.socialText}>
+          <Text
+            className="font-poppins-medium text-body-md text-ink"
+            style={styles.socialText}
+          >
             Continue with Apple
           </Text>
         </TouchableOpacity>
@@ -147,6 +258,7 @@ export default function SignUpScreen() {
         visible={showModal}
         email={email}
         onClose={() => setShowModal(false)}
+        onComplete={handleVerify}
       />
     </SafeAreaView>
   );
