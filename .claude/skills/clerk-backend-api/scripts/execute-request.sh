@@ -11,15 +11,34 @@
 
 set -euo pipefail
 
+parse_env_file() {
+  local file="$1"
+  while IFS= read -r line || [[ -n "$line" ]]; do
+    line="${line%%#*}"
+    [[ -z "$line" ]] && continue
+    if [[ "$line" =~ ^[[:space:]]*([A-Za-z_][A-Za-z0-9_]*)=(.*)$ ]]; then
+      local key="${BASH_REMATCH[1]}"
+      local value="${BASH_REMATCH[2]}"
+      value="${value#\"}"
+      value="${value%\"}"
+      value="${value#\'}"
+      value="${value%\'}"
+      case "$key" in
+        CLERK_SECRET_KEY|CLERK_BAPI_SCOPES|CLERK_REST_API_URL)
+          export "$key=$value"
+          ;;
+      esac
+    fi
+  done < "$file"
+}
+
 # Walk up from $PWD to find .env/.env.local (mirrors Clerk CLI behavior).
 # Stops at the first directory that provides CLERK_SECRET_KEY.
 _dir="$PWD"
 while true; do
   for _envfile in "$_dir/.env" "$_dir/.env.local"; do
     if [[ -f "$_envfile" ]]; then
-      set -a
-      source "$_envfile"
-      set +a
+      parse_env_file "$_envfile"
     fi
   done
   [[ -n "${CLERK_SECRET_KEY:-}" ]] && break
@@ -56,7 +75,7 @@ if [[ "$ADMIN" == false ]]; then
       fi
       ;;
     DELETE)
-      if [[ "$SCOPES" != *"write"* ]] || [[ "$SCOPES" != *"delete"* ]]; then
+      if [[ "$SCOPES" != *"write"* ]] && [[ "$SCOPES" != *"delete"* ]]; then
         echo "ERROR: DELETE requests require CLERK_BAPI_SCOPES=\"write,delete\" or --admin flag." >&2
         echo "Current CLERK_BAPI_SCOPES: \"$SCOPES\"" >&2
         exit 1

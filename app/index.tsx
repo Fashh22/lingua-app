@@ -1,6 +1,6 @@
+import { useLanguageStore } from "@/store/useLanguageStore";
 import { useAuth } from "@clerk/expo";
 import { Redirect } from "expo-router";
-import { useLanguageStore } from "@/store/useLanguageStore";
 
 export default function Index() {
   const { isSignedIn, isLoaded } = useAuth();

@@ -31,7 +31,6 @@ clerk users list --email-address alice@example.com
 
 # Open a user's profile in the dashboard
 clerk users open user_abc123
-clerk users open user_abc123 --print     # print the URL instead of opening
 
 # Create a user (preferred; curated flags)
 clerk users create \
