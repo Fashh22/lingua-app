@@ -1,4 +1,5 @@
-import { Text, View } from "react-native";
+import { Text, TouchableOpacity, View } from "react-native";
+import { router } from "expo-router";
 
 export default function Index() {
   return (
@@ -10,6 +11,14 @@ export default function Index() {
       }}
     >
       <Text>Jamsani Pogi</Text>
+      <TouchableOpacity
+        onPress={() => router.push("/onboarding" as any)}
+        style={{ marginTop: 16, padding: 12 }}
+      >
+        <Text style={{ color: "#6C4EF5", fontWeight: "600" }}>
+          Go to Onboarding →
+        </Text>
+      </TouchableOpacity>
     </View>
   );
 }
