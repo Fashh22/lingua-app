@@ -1,5 +1,6 @@
 import { Image, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
+import { router } from "expo-router";
 import { images } from "@/constants/images";
 
 export default function OnboardingScreen() {
@@ -59,9 +60,7 @@ export default function OnboardingScreen() {
         {/* Get Started button */}
         <TouchableOpacity
           style={styles.button}
-          onPress={() => {
-            // Navigate to auth when implemented
-          }}
+          onPress={() => router.push("/(auth)/sign-up")}
           activeOpacity={0.85}
         >
           <Text className="font-poppins-semibold text-body-lg text-white">Get Started</Text>
