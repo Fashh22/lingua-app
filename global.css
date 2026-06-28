@@ -1,0 +1,119 @@
+@import "tailwindcss/theme.css" layer(theme);
+@import "tailwindcss/preflight.css" layer(base);
+@import "tailwindcss/utilities.css";
+@import "nativewind/theme";
+
+/* ============================================================
+   LINGUA DESIGN SYSTEM — THEME TOKENS
+   Maps to NativeWind utility classes:
+     --color-*    → bg-* / text-* / border-*
+     --font-*     → font-*
+     --text-*     → text-* (font-size)
+     --leading-*  → leading-*
+   ============================================================ */
+
+@theme {
+  /* ---- Brand Colors ---- */
+  --color-lingua-purple: #6c4ef5;
+  --color-lingua-deep-purple: #5b3bf6;
+  --color-lingua-blue: #4d8bff;
+  --color-lingua-green: #21c16b;
+
+  /* ---- Semantic Colors ---- */
+  --color-success: #21c16b;
+  --color-warning: #ffc800;
+  --color-streak: #ff8a00;
+  --color-error: #ff4d4f;
+  --color-info: #4d8bff;
+
+  /* ---- Neutral Colors ---- */
+  --color-ink: #0d132b;
+  --color-muted: #6b7280;
+  --color-border: #e5e7eb;
+  --color-surface: #f6f7fb;
+  --color-background: #ffffff;
+
+  /* ---- Font Families ---- */
+  --font-poppins: "Poppins_400Regular";
+  --font-poppins-medium: "Poppins_500Medium";
+  --font-poppins-semibold: "Poppins_600SemiBold";
+  --font-poppins-bold: "Poppins_700Bold";
+
+  /* ---- Font Sizes ---- */
+  --text-h1: 32px;
+  --text-h2: 24px;
+  --text-h3: 20px;
+  --text-h4: 16px;
+  --text-body-lg: 16px;
+  --text-body-md: 14px;
+  --text-body-sm: 13px;
+  --text-caption: 11px;
+
+  /* ---- Line Heights ---- */
+  --leading-h1: 1.2;
+  --leading-h2: 1.3;
+  --leading-h3: 1.3;
+  --leading-h4: 1.4;
+  --leading-body: 1.6;
+  --leading-caption: 1.4;
+}
+
+/* ============================================================
+   BEM COMPONENT UTILITIES
+   Usage: className="btn btn--primary"
+   ============================================================ */
+
+@layer components {
+  /* ---- Button ---- */
+  .btn {
+    @apply items-center justify-center rounded-2xl px-6 py-4 font-poppins-semibold text-body-lg;
+  }
+  .btn--primary {
+    @apply bg-lingua-purple text-white;
+  }
+  .btn--secondary {
+    @apply border border-border bg-surface text-ink;
+  }
+  .btn--ghost {
+    @apply bg-transparent text-lingua-purple;
+  }
+
+  /* ---- Card ---- */
+  .card {
+    @apply rounded-2xl p-4;
+  }
+  .card--surface {
+    @apply bg-surface;
+  }
+  .card--elevated {
+    @apply bg-background;
+  }
+
+  /* ---- Badge ---- */
+  .badge {
+    @apply rounded-full px-3 py-1 font-poppins text-caption;
+  }
+  .badge--primary {
+    @apply bg-lingua-purple text-white;
+  }
+  .badge--success {
+    @apply bg-success text-white;
+  }
+  .badge--warning {
+    @apply bg-warning text-ink;
+  }
+  .badge--streak {
+    @apply bg-streak text-white;
+  }
+  .badge--error {
+    @apply bg-error text-white;
+  }
+
+  /* ---- Input ---- */
+  .input {
+    @apply rounded-xl border border-border bg-background px-4 py-3 font-poppins text-body-md text-ink;
+  }
+  .input--focused {
+    @apply border-lingua-purple;
+  }
+}
