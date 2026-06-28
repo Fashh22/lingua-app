@@ -1,36 +1,52 @@
-import {
-  KeyboardAvoidingView,
-  Modal,
-  Platform,
-  StyleSheet,
-  Text,
-  TextInput,
-  TouchableOpacity,
-  View,
-} from "react-native";
 import { useRef, useState } from "react";
-import { router } from "expo-router";
+import {
+    KeyboardAvoidingView,
+    Modal,
+    Platform,
+    StyleSheet,
+    Text,
+    TextInput,
+    TouchableOpacity,
+    View,
+} from "react-native";
 
 type Props = {
   visible: boolean;
   email: string;
   onClose: () => void;
+  onComplete?: (code: string) => Promise<void> | void;
 };
 
-export default function VerificationModal({ visible, email, onClose }: Props) {
+export default function VerificationModal({
+  visible,
+  email,
+  onClose,
+  onComplete,
+}: Props) {
   const [code, setCode] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
   const inputRef = useRef<TextInput>(null);
 
-  function handleCodeChange(value: string) {
+  async function handleCodeChange(value: string) {
+    if (isLoading) return;
     const digits = value.replace(/[^0-9]/g, "").slice(0, 6);
     setCode(digits);
-    if (digits.length === 6) {
-      router.replace("/");
+
+    if (digits.length === 6 && onComplete) {
+      setIsLoading(true);
+      try {
+        await onComplete(digits);
+      } catch {
+        setCode("");
+      } finally {
+        setIsLoading(false);
+      }
     }
   }
 
   function handleClose() {
     setCode("");
+    setIsLoading(false);
     onClose();
   }
 
@@ -45,7 +61,11 @@ export default function VerificationModal({ visible, email, onClose }: Props) {
         behavior={Platform.OS === "ios" ? "padding" : "height"}
         style={styles.overlay}
       >
-        <TouchableOpacity style={styles.backdrop} activeOpacity={1} onPress={handleClose} />
+        <TouchableOpacity
+          style={styles.backdrop}
+          activeOpacity={1}
+          onPress={handleClose}
+        />
 
         <View style={styles.sheet}>
           {/* Handle bar */}
@@ -56,7 +76,9 @@ export default function VerificationModal({ visible, email, onClose }: Props) {
           </Text>
           <Text className="font-poppins text-body-md text-muted mb-6 text-center">
             We sent a 6-digit code to{"\n"}
-            <Text className="font-poppins-semibold text-ink">{email || "your email"}</Text>
+            <Text className="font-poppins-semibold text-ink">
+              {email || "your email"}
+            </Text>
           </Text>
 
           {/* OTP boxes — tap to focus the hidden input */}
@@ -91,6 +113,7 @@ export default function VerificationModal({ visible, email, onClose }: Props) {
             keyboardType="number-pad"
             maxLength={6}
             autoFocus
+            editable={!isLoading}
             style={styles.hiddenInput}
           />
         </View>
