@@ -1,6 +1,7 @@
 import { Ionicons } from "@expo/vector-icons";
 import { router } from "expo-router";
 import { useMemo, useState } from "react";
+import { useLanguageStore } from "@/store/useLanguageStore";
 import {
   Dimensions,
   Image,
@@ -19,6 +20,7 @@ import { Language } from "@/types/learning";
 export default function LanguageSelectScreen() {
   const [selected, setSelected] = useState<string | null>(null);
   const [query, setQuery] = useState("");
+  const { setSelectedLanguage } = useLanguageStore();
 
   const filtered = useMemo(() => {
     const q = query.trim().toLowerCase();
@@ -102,7 +104,10 @@ export default function LanguageSelectScreen() {
         <TouchableOpacity
           style={[styles.confirmBtn, !selected && styles.confirmBtnDisabled]}
           disabled={!selected}
-          onPress={() => router.replace("/")}
+          onPress={() => {
+            if (selected) setSelectedLanguage(selected);
+            router.replace("/");
+          }}
           activeOpacity={0.85}
         >
           <Text
