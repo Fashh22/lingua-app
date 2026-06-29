@@ -22,8 +22,9 @@ if (!publishableKey) {
   throw new Error("Add EXPO_PUBLIC_CLERK_PUBLISHABLE_KEY to your .env file");
 }
 
-const posthogKey = process.env.EXPO_PUBLIC_POSTHOG_KEY!;
-const posthogHost = process.env.EXPO_PUBLIC_POSTHOG_HOST!;
+const posthogKey = process.env.EXPO_PUBLIC_POSTHOG_KEY;
+const posthogHost = process.env.EXPO_PUBLIC_POSTHOG_HOST;
+const shouldUsePostHog = Boolean(posthogKey && posthogHost);
 
 export default function RootLayout() {
   const [fontsLoaded] = useFonts({
@@ -41,11 +42,15 @@ export default function RootLayout() {
 
   if (!fontsLoaded) return null;
 
-  return (
-    <PostHogProvider apiKey={posthogKey} options={{ host: posthogHost }}>
+  return shouldUsePostHog ? (
+    <PostHogProvider apiKey={posthogKey!} options={{ host: posthogHost! }}>
       <ClerkProvider publishableKey={publishableKey} tokenCache={tokenCache}>
         <Stack screenOptions={{ headerShown: false }} />
       </ClerkProvider>
     </PostHogProvider>
+  ) : (
+    <ClerkProvider publishableKey={publishableKey} tokenCache={tokenCache}>
+      <Stack screenOptions={{ headerShown: false }} />
+    </ClerkProvider>
   );
 }

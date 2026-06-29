@@ -19,10 +19,14 @@ parse_env_file() {
     if [[ "$line" =~ ^[[:space:]]*([A-Za-z_][A-Za-z0-9_]*)=(.*)$ ]]; then
       local key="${BASH_REMATCH[1]}"
       local value="${BASH_REMATCH[2]}"
+      value="${value#${value%%[![:space:]]*}}"
+      value="${value%${value##*[![:space:]]}}"
       value="${value#\"}"
       value="${value%\"}"
       value="${value#\'}"
       value="${value%\'}"
+      value="${value#${value%%[![:space:]]*}}"
+      value="${value%${value##*[![:space:]]}}"
       case "$key" in
         CLERK_SECRET_KEY|CLERK_BAPI_SCOPES|CLERK_REST_API_URL)
           export "$key=$value"

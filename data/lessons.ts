@@ -258,6 +258,32 @@ export const lessons: Lesson[] = [
       "You are Luna, a friendly Spanish teacher. Teach the student the numbers 1 through 10 in Spanish. Use fun examples like counting objects or ages. Help them with pronunciation. Be patient and encouraging.",
   },
 
+  // ─── Spanish › Unit 2 › Lesson 2 ───────────────────────────────────────────
+  {
+    id: "es-2-2",
+    unitId: "es-unit-2",
+    order: 2,
+    title: "Numbers 6–10",
+    description: "Complete counting from six to ten in Spanish",
+    xpReward: 10,
+    estimatedMinutes: 5,
+    goals: ["Count from 6 to 10 in Spanish", "Use numbers in simple sentences"],
+    vocabulary: [
+      { word: "seis", translation: "six", pronunciation: "SAYS", example: "Hay seis manzanas.", exampleTranslation: "There are six apples." },
+      { word: "siete", translation: "seven", pronunciation: "SYEH-teh", example: "Son las siete.", exampleTranslation: "It is seven o'clock." },
+      { word: "ocho", translation: "eight", pronunciation: "OH-cho", example: "Ocho horas de sueño.", exampleTranslation: "Eight hours of sleep." },
+      { word: "nueve", translation: "nine", pronunciation: "NWEH-veh", example: "Nueve estudiantes.", exampleTranslation: "Nine students." },
+      { word: "diez", translation: "ten", pronunciation: "DYETH", example: "Diez minutos más.", exampleTranslation: "Ten more minutes." },
+    ],
+    phrases: [],
+    activities: [
+      { id: "es-2-2-a1", type: "vocabulary", question: "What does 'ocho' mean?", correctAnswer: "eight", options: ["six", "seven", "eight", "nine"] },
+      { id: "es-2-2-a2", type: "translate", question: "Translate: ten", correctAnswer: "diez", options: ["seis", "siete", "nueve", "diez"] },
+    ],
+    aiTeacherPrompt:
+      "You are Luna, a friendly Spanish teacher. Teach the student Spanish numbers 6 through 10: seis, siete, ocho, nueve, diez. Use counting games and fun examples. Be encouraging.",
+  },
+
   // ─── French › Unit 1 › Lesson 1 ────────────────────────────────────────────
   {
     id: "fr-1-1",
@@ -404,5 +430,588 @@ export const lessons: Lesson[] = [
     ],
     aiTeacherPrompt:
       "You are Hana, a friendly Japanese teacher. Teach the student basic Japanese greetings: 'こんにちは', 'おはようございます', 'こんばんは', and 'さようなら'. Include pronunciation tips using romaji. Explain when to use each greeting. Be patient, clear, and encouraging.",
+  },
+
+  // ─── French › Unit 1 › Lesson 2 ────────────────────────────────────────────
+  {
+    id: "fr-1-2",
+    unitId: "fr-unit-1",
+    order: 2,
+    title: "Je m'appelle… Introductions",
+    description: "Learn how to introduce yourself in French",
+    xpReward: 10,
+    estimatedMinutes: 6,
+    goals: ["Say your name in French", "Ask someone's name", "Say where you're from"],
+    vocabulary: [
+      { word: "je m'appelle", translation: "my name is", pronunciation: "zhuh ma-PEL", example: "Je m'appelle Marie.", exampleTranslation: "My name is Marie." },
+      { word: "je suis de", translation: "I am from", pronunciation: "zhuh swee duh", example: "Je suis de Paris.", exampleTranslation: "I am from Paris." },
+      { word: "enchanté(e)", translation: "nice to meet you", pronunciation: "on-shon-TAY", example: "Enchanté, Pierre!", exampleTranslation: "Nice to meet you, Pierre!" },
+    ],
+    phrases: [
+      { phrase: "Comment vous appelez-vous?", translation: "What is your name? (formal)", pronunciation: "koh-MON voo za-play-VOO", context: "Formal way to ask someone's name" },
+      { phrase: "Tu t'appelles comment?", translation: "What is your name? (informal)", pronunciation: "tu ta-PEL koh-MON", context: "Casual way to ask a friend's name" },
+    ],
+    activities: [
+      { id: "fr-1-2-a1", type: "translate", question: "Translate: my name is", correctAnswer: "je m'appelle", options: ["je suis de", "je m'appelle", "enchanté", "bonjour"] },
+      { id: "fr-1-2-a2", type: "vocabulary", question: "How do you say 'nice to meet you' in French?", correctAnswer: "enchanté(e)", options: ["bonjour", "salut", "enchanté(e)", "au revoir"] },
+    ],
+    aiTeacherPrompt:
+      "You are Claire, a warm French teacher. Teach the student French introductions: 'je m'appelle', 'je suis de', 'enchanté'. Role-play a short introduction at a café. Keep it fun and simple.",
+  },
+
+  // ─── French › Unit 1 › Lesson 3 ────────────────────────────────────────────
+  {
+    id: "fr-1-3",
+    unitId: "fr-unit-1",
+    order: 3,
+    title: "S'il vous plaît! Politeness",
+    description: "Master French courtesy words",
+    xpReward: 10,
+    estimatedMinutes: 5,
+    goals: ["Say please and thank you in French", "Use polite expressions"],
+    vocabulary: [
+      { word: "s'il vous plaît", translation: "please (formal)", pronunciation: "seel voo PLAY", example: "Un café, s'il vous plaît.", exampleTranslation: "A coffee, please." },
+      { word: "merci", translation: "thank you", pronunciation: "mer-SEE", example: "Merci beaucoup!", exampleTranslation: "Thank you very much!" },
+      { word: "de rien", translation: "you're welcome", pronunciation: "duh RYEN", example: "—Merci. —De rien.", exampleTranslation: "—Thank you. —You're welcome." },
+      { word: "excusez-moi", translation: "excuse me", pronunciation: "ex-koo-zay MWAH", example: "Excusez-moi, où sont les toilettes?", exampleTranslation: "Excuse me, where are the toilets?" },
+    ],
+    phrases: [],
+    activities: [
+      { id: "fr-1-3-a1", type: "vocabulary", question: "What does 'merci' mean?", correctAnswer: "thank you", options: ["please", "thank you", "you're welcome", "excuse me"] },
+      { id: "fr-1-3-a2", type: "fill_blank", question: "Un café, ___ vous plaît.", correctAnswer: "s'il", options: ["s'il", "de", "avec", "pour"] },
+    ],
+    aiTeacherPrompt:
+      "You are Claire, a warm French teacher. Teach the student French politeness: 's'il vous plaît', 'merci', 'de rien', 'excusez-moi'. Use café ordering examples. Be warm and encouraging.",
+  },
+
+  // ─── French › Unit 1 › Lesson 4 ────────────────────────────────────────────
+  {
+    id: "fr-1-4",
+    unitId: "fr-unit-1",
+    order: 4,
+    title: "Les Nombres: Numbers 1–10",
+    description: "Count from one to ten in French",
+    xpReward: 10,
+    estimatedMinutes: 5,
+    goals: ["Count from 1 to 10 in French", "Recognize French number words"],
+    vocabulary: [
+      { word: "un / une", translation: "one", pronunciation: "UH / OON", example: "Un café, s'il vous plaît.", exampleTranslation: "One coffee, please." },
+      { word: "deux", translation: "two", pronunciation: "DUH", example: "Deux billets.", exampleTranslation: "Two tickets." },
+      { word: "trois", translation: "three", pronunciation: "TWAH", example: "Trois amis.", exampleTranslation: "Three friends." },
+      { word: "cinq", translation: "five", pronunciation: "SANK", example: "Cinq minutes.", exampleTranslation: "Five minutes." },
+      { word: "dix", translation: "ten", pronunciation: "DEES", example: "Dix euros.", exampleTranslation: "Ten euros." },
+    ],
+    phrases: [],
+    activities: [
+      { id: "fr-1-4-a1", type: "vocabulary", question: "What does 'trois' mean?", correctAnswer: "three", options: ["one", "two", "three", "four"] },
+      { id: "fr-1-4-a2", type: "translate", question: "Translate: ten", correctAnswer: "dix", options: ["cinq", "sept", "huit", "dix"] },
+    ],
+    aiTeacherPrompt:
+      "You are Claire, a warm French teacher. Teach the student French numbers 1 through 10. Use practical examples like ordering in a café or buying tickets. Make it fun!",
+  },
+
+  // ─── French › Unit 1 › Lesson 5 ────────────────────────────────────────────
+  {
+    id: "fr-1-5",
+    unitId: "fr-unit-1",
+    order: 5,
+    title: "Les Couleurs: Colors",
+    description: "Learn the most common colors in French",
+    xpReward: 10,
+    estimatedMinutes: 5,
+    goals: ["Name common colors in French", "Describe objects using colors"],
+    vocabulary: [
+      { word: "rouge", translation: "red", pronunciation: "ROOZH", example: "Une rose rouge.", exampleTranslation: "A red rose." },
+      { word: "bleu(e)", translation: "blue", pronunciation: "BLUH", example: "Le ciel est bleu.", exampleTranslation: "The sky is blue." },
+      { word: "vert(e)", translation: "green", pronunciation: "VEHR", example: "Un arbre vert.", exampleTranslation: "A green tree." },
+      { word: "blanc(he)", translation: "white", pronunciation: "BLON", example: "Une chemise blanche.", exampleTranslation: "A white shirt." },
+      { word: "noir(e)", translation: "black", pronunciation: "NWAHR", example: "Un chat noir.", exampleTranslation: "A black cat." },
+    ],
+    phrases: [],
+    activities: [
+      { id: "fr-1-5-a1", type: "vocabulary", question: "What does 'rouge' mean?", correctAnswer: "red", options: ["red", "blue", "green", "white"] },
+      { id: "fr-1-5-a2", type: "translate", question: "Translate: black", correctAnswer: "noir(e)", options: ["rouge", "bleu", "vert", "noir(e)"] },
+    ],
+    aiTeacherPrompt:
+      "You are Claire, a warm French teacher. Teach the student French colors: rouge, bleu, vert, blanc, noir. Describe objects using colors. Make it visual and fun!",
+  },
+
+  // ─── French › Unit 1 › Lesson 6 ────────────────────────────────────────────
+  {
+    id: "fr-1-6",
+    unitId: "fr-unit-1",
+    order: 6,
+    title: "Les Jours: Days of the Week",
+    description: "Learn the days of the week in French",
+    xpReward: 10,
+    estimatedMinutes: 6,
+    goals: ["Name all days of the week in French", "Say what day it is"],
+    vocabulary: [
+      { word: "lundi", translation: "Monday", pronunciation: "LUN-dee", example: "Lundi je travaille.", exampleTranslation: "On Monday I work." },
+      { word: "mercredi", translation: "Wednesday", pronunciation: "mehr-KRUH-dee", example: "Mercredi c'est le marché.", exampleTranslation: "Wednesday is market day." },
+      { word: "vendredi", translation: "Friday", pronunciation: "von-DRUH-dee", example: "Vendredi soir on sort!", exampleTranslation: "Friday night we go out!" },
+      { word: "dimanche", translation: "Sunday", pronunciation: "dee-MONSh", example: "Le dimanche je me repose.", exampleTranslation: "On Sunday I rest." },
+    ],
+    phrases: [
+      { phrase: "Quel jour sommes-nous?", translation: "What day is it?", pronunciation: "kel ZHOOR som-NOO", context: "Asking what day of the week it is" },
+      { phrase: "Aujourd'hui c'est lundi.", translation: "Today is Monday.", pronunciation: "oh-zhoor-DWEE say lun-dee", context: "Stating today's day" },
+    ],
+    activities: [
+      { id: "fr-1-6-a1", type: "vocabulary", question: "What does 'vendredi' mean?", correctAnswer: "Friday", options: ["Monday", "Wednesday", "Friday", "Sunday"] },
+      { id: "fr-1-6-a2", type: "translate", question: "Translate: Sunday", correctAnswer: "dimanche", options: ["lundi", "mercredi", "vendredi", "dimanche"] },
+    ],
+    aiTeacherPrompt:
+      "You are Claire, a warm French teacher. Teach the student the French days of the week: lundi, mardi, mercredi, jeudi, vendredi, samedi, dimanche. Use a weekly schedule example to make it practical and memorable.",
+  },
+
+  // ─── Japanese › Unit 1 › Lesson 2 ──────────────────────────────────────────
+  {
+    id: "ja-1-2",
+    unitId: "ja-unit-1",
+    order: 2,
+    title: "Hajimemashite! Introductions",
+    description: "Learn how to introduce yourself in Japanese",
+    xpReward: 10,
+    estimatedMinutes: 7,
+    goals: ["Introduce yourself in Japanese", "Ask someone's name politely", "Use -san honorific"],
+    vocabulary: [
+      { word: "はじめまして", translation: "nice to meet you", pronunciation: "ha-ji-me-MA-shi-te", example: "はじめまして、田中です。", exampleTranslation: "Nice to meet you, I'm Tanaka." },
+      { word: "わたしは〜です", translation: "I am ~", pronunciation: "wa-TA-shi wa ~ de-su", example: "わたしはアリです。", exampleTranslation: "I am Ali." },
+      { word: "〜さん", translation: "Mr./Ms. ~ (honorific)", pronunciation: "~ san", example: "田中さん、こんにちは。", exampleTranslation: "Hello, Ms. Tanaka." },
+      { word: "どうぞよろしく", translation: "pleased to meet you", pronunciation: "DOH-zo yo-RO-shi-ku", example: "どうぞよろしくお願いします。", exampleTranslation: "I'm pleased to meet you." },
+    ],
+    phrases: [
+      { phrase: "おなまえは？", translation: "What is your name?", pronunciation: "o-NA-ma-e wa", context: "Casual way to ask someone's name" },
+    ],
+    activities: [
+      { id: "ja-1-2-a1", type: "vocabulary", question: "What does 'はじめまして' mean?", correctAnswer: "nice to meet you", options: ["hello", "goodbye", "nice to meet you", "thank you"] },
+      { id: "ja-1-2-a2", type: "translate", question: "Translate: I am ~", correctAnswer: "わたしは〜です", options: ["はじめまして", "さようなら", "わたしは〜です", "ありがとう"] },
+    ],
+    aiTeacherPrompt:
+      "You are Hana, a friendly Japanese teacher. Teach the student Japanese introductions: 'はじめまして', 'わたしは〜です', '-さん', 'どうぞよろしく'. Practice a short self-introduction together. Use romaji and English explanations.",
+  },
+
+  // ─── Japanese › Unit 1 › Lesson 3 ──────────────────────────────────────────
+  {
+    id: "ja-1-3",
+    unitId: "ja-unit-1",
+    order: 3,
+    title: "Arigatou! Politeness",
+    description: "Learn essential Japanese polite expressions",
+    xpReward: 10,
+    estimatedMinutes: 5,
+    goals: ["Say thank you and please in Japanese", "Use polite speech endings"],
+    vocabulary: [
+      { word: "ありがとうございます", translation: "thank you (formal)", pronunciation: "a-ri-ga-TO go-ZAI-ma-su", example: "ありがとうございます！", exampleTranslation: "Thank you very much!" },
+      { word: "すみません", translation: "excuse me / sorry", pronunciation: "su-mi-MA-sen", example: "すみません、ちょっといいですか？", exampleTranslation: "Excuse me, do you have a moment?" },
+      { word: "どういたしまして", translation: "you're welcome", pronunciation: "do-i-TA-shi-MA-shi-te", example: "—ありがとう。—どういたしまして。", exampleTranslation: "—Thank you. —You're welcome." },
+    ],
+    phrases: [],
+    activities: [
+      { id: "ja-1-3-a1", type: "vocabulary", question: "How do you say 'thank you (formal)' in Japanese?", correctAnswer: "ありがとうございます", options: ["こんにちは", "さようなら", "ありがとうございます", "すみません"] },
+      { id: "ja-1-3-a2", type: "translate", question: "Translate: excuse me / sorry", correctAnswer: "すみません", options: ["ありがとう", "すみません", "はじめまして", "どうぞ"] },
+    ],
+    aiTeacherPrompt:
+      "You are Hana, a friendly Japanese teacher. Teach the student Japanese politeness: 'ありがとうございます', 'すみません', 'どういたしまして'. Explain the importance of polite speech in Japanese culture. Give practical examples.",
+  },
+
+  // ─── Japanese › Unit 1 › Lesson 4 ──────────────────────────────────────────
+  {
+    id: "ja-1-4",
+    unitId: "ja-unit-1",
+    order: 4,
+    title: "Ichi, Ni, San! Numbers 1–10",
+    description: "Count from one to ten in Japanese",
+    xpReward: 10,
+    estimatedMinutes: 6,
+    goals: ["Count from 1 to 10 in Japanese", "Understand Japanese number readings"],
+    vocabulary: [
+      { word: "いち", translation: "one", pronunciation: "i-CHI", example: "いち、に、さん！", exampleTranslation: "One, two, three!" },
+      { word: "に", translation: "two", pronunciation: "ni", example: "ふたり。", exampleTranslation: "Two people." },
+      { word: "さん", translation: "three", pronunciation: "san", example: "さんにん。", exampleTranslation: "Three people." },
+      { word: "ご", translation: "five", pronunciation: "go", example: "ごえん。", exampleTranslation: "Five yen." },
+      { word: "じゅう", translation: "ten", pronunciation: "ju", example: "じゅっぷん。", exampleTranslation: "Ten minutes." },
+    ],
+    phrases: [],
+    activities: [
+      { id: "ja-1-4-a1", type: "vocabulary", question: "What does 'さん' mean in Japanese?", correctAnswer: "three", options: ["one", "two", "three", "four"] },
+      { id: "ja-1-4-a2", type: "translate", question: "Translate: ten", correctAnswer: "じゅう", options: ["いち", "ご", "なな", "じゅう"] },
+    ],
+    aiTeacherPrompt:
+      "You are Hana, a friendly Japanese teacher. Teach the student Japanese numbers 1 to 10: ichi, ni, san, shi, go, roku, nana, hachi, kyuu, juu. Practice counting together!",
+  },
+
+  // ─── Japanese › Unit 1 › Lesson 5 ──────────────────────────────────────────
+  {
+    id: "ja-1-5",
+    unitId: "ja-unit-1",
+    order: 5,
+    title: "Hiragana: A, I, U, E, O",
+    description: "Learn the five Japanese vowel sounds",
+    xpReward: 15,
+    estimatedMinutes: 8,
+    goals: ["Read hiragana vowels", "Recognize a-i-u-e-o sounds"],
+    vocabulary: [
+      { word: "あ", translation: "a (like 'ah')", pronunciation: "a", example: "あめ (ame)", exampleTranslation: "rain" },
+      { word: "い", translation: "i (like 'ee')", pronunciation: "i", example: "いぬ (inu)", exampleTranslation: "dog" },
+      { word: "う", translation: "u (like 'oo')", pronunciation: "u", example: "うみ (umi)", exampleTranslation: "sea" },
+      { word: "え", translation: "e (like 'eh')", pronunciation: "e", example: "えき (eki)", exampleTranslation: "station" },
+      { word: "お", translation: "o (like 'oh')", pronunciation: "o", example: "おとこ (otoko)", exampleTranslation: "man" },
+    ],
+    phrases: [],
+    activities: [
+      { id: "ja-1-5-a1", type: "vocabulary", question: "What sound does 'あ' make?", correctAnswer: "a (like 'ah')", options: ["a (like 'ah')", "i (like 'ee')", "u (like 'oo')", "e (like 'eh')"] },
+      { id: "ja-1-5-a2", type: "translate", question: "What does 'いぬ (inu)' mean?", correctAnswer: "dog", options: ["cat", "dog", "rain", "sea"] },
+    ],
+    aiTeacherPrompt:
+      "You are Hana, a friendly Japanese teacher. Introduce the student to hiragana vowels: あ、い、う、え、お. Give simple vocabulary examples for each vowel. Be encouraging — hiragana takes practice!",
+  },
+
+  // ─── Japanese › Unit 1 › Lesson 6 ──────────────────────────────────────────
+  {
+    id: "ja-1-6",
+    unitId: "ja-unit-1",
+    order: 6,
+    title: "Kazoku: Family",
+    description: "Learn how to talk about family in Japanese",
+    xpReward: 10,
+    estimatedMinutes: 6,
+    goals: ["Name family members in Japanese", "Introduce your family politely"],
+    vocabulary: [
+      { word: "おかあさん", translation: "mother", pronunciation: "o-KA-san", example: "おかあさんはどこですか？", exampleTranslation: "Where is mother?" },
+      { word: "おとうさん", translation: "father", pronunciation: "o-TO-san", example: "おとうさんは医者です。", exampleTranslation: "My father is a doctor." },
+      { word: "あに", translation: "older brother", pronunciation: "a-ni", example: "あには大学生です。", exampleTranslation: "My older brother is a university student." },
+      { word: "あね", translation: "older sister", pronunciation: "a-ne", example: "あねはきれいです。", exampleTranslation: "My older sister is beautiful." },
+    ],
+    phrases: [
+      { phrase: "かぞくはなんにんですか？", translation: "How many people are in your family?", pronunciation: "KA-zo-ku wa NAN-nin des-ka", context: "Asking about family size" },
+    ],
+    activities: [
+      { id: "ja-1-6-a1", type: "vocabulary", question: "What does 'おかあさん' mean?", correctAnswer: "mother", options: ["father", "mother", "older brother", "older sister"] },
+      { id: "ja-1-6-a2", type: "translate", question: "Translate: father", correctAnswer: "おとうさん", options: ["おかあさん", "おとうさん", "あに", "あね"] },
+    ],
+    aiTeacherPrompt:
+      "You are Hana, a friendly Japanese teacher. Teach the student Japanese family vocabulary: おかあさん、おとうさん、あに、あね. Explain humble vs. respectful forms for family. Keep it engaging.",
+  },
+
+  // ─── German › Unit 1 › Lesson 1 ────────────────────────────────────────────
+  {
+    id: "de-1-1",
+    unitId: "de-unit-1",
+    order: 1,
+    title: "Guten Tag! Greetings",
+    description: "Learn how to greet people in German",
+    xpReward: 10,
+    estimatedMinutes: 5,
+    goals: ["Say hello and goodbye in German", "Use greetings at different times of day"],
+    vocabulary: [
+      { word: "guten Morgen", translation: "good morning", pronunciation: "GOO-ten MOR-gen", example: "Guten Morgen! Wie geht's?", exampleTranslation: "Good morning! How are you?" },
+      { word: "guten Tag", translation: "good day / hello", pronunciation: "GOO-ten TAHK", example: "Guten Tag, Herr Müller.", exampleTranslation: "Good day, Mr. Müller." },
+      { word: "guten Abend", translation: "good evening", pronunciation: "GOO-ten AH-bent", example: "Guten Abend, alle!", exampleTranslation: "Good evening, everyone!" },
+      { word: "auf Wiedersehen", translation: "goodbye (formal)", pronunciation: "owf VEE-der-zay-en", example: "Auf Wiedersehen und bis morgen!", exampleTranslation: "Goodbye and see you tomorrow!" },
+      { word: "tschüss", translation: "bye (informal)", pronunciation: "CHOOS", example: "Tschüss! Bis später.", exampleTranslation: "Bye! See you later." },
+    ],
+    phrases: [
+      { phrase: "Wie geht es Ihnen?", translation: "How are you? (formal)", pronunciation: "vee gayt es EE-nen", context: "Formal greeting to ask how someone is" },
+      { phrase: "Wie geht's?", translation: "How are you? (informal)", pronunciation: "vee gayts", context: "Casual greeting between friends" },
+    ],
+    activities: [
+      { id: "de-1-1-a1", type: "vocabulary", question: "What does 'guten Morgen' mean?", correctAnswer: "good morning", options: ["good morning", "good evening", "goodbye", "hello"] },
+      { id: "de-1-1-a2", type: "translate", question: "Translate: goodbye (formal)", correctAnswer: "auf Wiedersehen", options: ["tschüss", "guten Tag", "auf Wiedersehen", "hallo"] },
+    ],
+    aiTeacherPrompt:
+      "You are Max, a friendly German teacher. Teach the student German greetings: 'guten Morgen', 'guten Tag', 'guten Abend', 'auf Wiedersehen', 'tschüss'. Explain formal vs informal usage. Make it conversational and fun.",
+  },
+
+  // ─── German › Unit 1 › Lesson 2 ────────────────────────────────────────────
+  {
+    id: "de-1-2",
+    unitId: "de-unit-1",
+    order: 2,
+    title: "Ich heiße… Introductions",
+    description: "Introduce yourself and others in German",
+    xpReward: 10,
+    estimatedMinutes: 6,
+    goals: ["Say your name in German", "Introduce yourself", "Say where you're from"],
+    vocabulary: [
+      { word: "ich heiße", translation: "my name is", pronunciation: "ikh HY-suh", example: "Ich heiße Anna.", exampleTranslation: "My name is Anna." },
+      { word: "ich komme aus", translation: "I come from", pronunciation: "ikh KOM-uh ows", example: "Ich komme aus Berlin.", exampleTranslation: "I come from Berlin." },
+      { word: "freut mich", translation: "nice to meet you", pronunciation: "froyt mikh", example: "Freut mich, Sie kennenzulernen!", exampleTranslation: "Nice to meet you!" },
+    ],
+    phrases: [
+      { phrase: "Wie heißen Sie?", translation: "What is your name? (formal)", pronunciation: "vee HY-sen zee", context: "Formal way to ask someone's name" },
+      { phrase: "Wie heißt du?", translation: "What is your name? (informal)", pronunciation: "vee HYTST doo", context: "Casual way to ask a friend's name" },
+    ],
+    activities: [
+      { id: "de-1-2-a1", type: "translate", question: "Translate: my name is", correctAnswer: "ich heiße", options: ["ich komme aus", "ich heiße", "freut mich", "guten Tag"] },
+      { id: "de-1-2-a2", type: "vocabulary", question: "How do you say 'nice to meet you' in German?", correctAnswer: "freut mich", options: ["auf Wiedersehen", "tschüss", "freut mich", "wie geht's"] },
+    ],
+    aiTeacherPrompt:
+      "You are Max, a friendly German teacher. Teach the student German introductions: 'ich heiße', 'ich komme aus', 'freut mich'. Role-play a short meeting. Explain formal and informal address.",
+  },
+
+  // ─── German › Unit 1 › Lesson 3 ────────────────────────────────────────────
+  {
+    id: "de-1-3",
+    unitId: "de-unit-1",
+    order: 3,
+    title: "Bitte & Danke! Politeness",
+    description: "Master essential German courtesy expressions",
+    xpReward: 10,
+    estimatedMinutes: 5,
+    goals: ["Say please and thank you in German", "Use polite expressions in context"],
+    vocabulary: [
+      { word: "bitte", translation: "please / you're welcome", pronunciation: "BIT-uh", example: "Einen Kaffee, bitte!", exampleTranslation: "A coffee, please!" },
+      { word: "danke", translation: "thank you", pronunciation: "DAN-kuh", example: "Danke schön!", exampleTranslation: "Thank you very much!" },
+      { word: "bitte schön", translation: "you're welcome / here you go", pronunciation: "BIT-uh shern", example: "—Danke. —Bitte schön!", exampleTranslation: "—Thank you. —You're welcome!" },
+      { word: "entschuldigung", translation: "excuse me / sorry", pronunciation: "ent-SHUL-di-goong", example: "Entschuldigung, wo ist der Bahnhof?", exampleTranslation: "Excuse me, where is the train station?" },
+    ],
+    phrases: [],
+    activities: [
+      { id: "de-1-3-a1", type: "vocabulary", question: "What does 'danke' mean?", correctAnswer: "thank you", options: ["please", "thank you", "you're welcome", "excuse me"] },
+      { id: "de-1-3-a2", type: "fill_blank", question: "Einen Kaffee, ___!", correctAnswer: "bitte", options: ["bitte", "danke", "hallo", "tschüss"] },
+    ],
+    aiTeacherPrompt:
+      "You are Max, a friendly German teacher. Teach the student German politeness: 'bitte', 'danke', 'bitte schön', 'entschuldigung'. Give examples of ordering at a restaurant. Be clear and encouraging.",
+  },
+
+  // ─── German › Unit 1 › Lesson 4 ────────────────────────────────────────────
+  {
+    id: "de-1-4",
+    unitId: "de-unit-1",
+    order: 4,
+    title: "Zahlen: Numbers 1–10",
+    description: "Count from one to ten in German",
+    xpReward: 10,
+    estimatedMinutes: 5,
+    goals: ["Count from 1 to 10 in German", "Recognize German number words"],
+    vocabulary: [
+      { word: "eins", translation: "one", pronunciation: "AYNS", example: "Eins, zwei, drei!", exampleTranslation: "One, two, three!" },
+      { word: "zwei", translation: "two", pronunciation: "TSVY", example: "Zwei Tassen Tee.", exampleTranslation: "Two cups of tea." },
+      { word: "drei", translation: "three", pronunciation: "DRY", example: "Drei Freunde.", exampleTranslation: "Three friends." },
+      { word: "fünf", translation: "five", pronunciation: "FOONF", example: "Fünf Minuten.", exampleTranslation: "Five minutes." },
+      { word: "zehn", translation: "ten", pronunciation: "TSAYN", example: "Zehn Euro.", exampleTranslation: "Ten euros." },
+    ],
+    phrases: [],
+    activities: [
+      { id: "de-1-4-a1", type: "vocabulary", question: "What does 'drei' mean?", correctAnswer: "three", options: ["one", "two", "three", "four"] },
+      { id: "de-1-4-a2", type: "translate", question: "Translate: ten", correctAnswer: "zehn", options: ["fünf", "acht", "neun", "zehn"] },
+    ],
+    aiTeacherPrompt:
+      "You are Max, a friendly German teacher. Teach the student German numbers 1 through 10: eins, zwei, drei, vier, fünf, sechs, sieben, acht, neun, zehn. Use counting practice and practical examples.",
+  },
+
+  // ─── German › Unit 1 › Lesson 5 ────────────────────────────────────────────
+  {
+    id: "de-1-5",
+    unitId: "de-unit-1",
+    order: 5,
+    title: "Farben: Colors",
+    description: "Learn the most common colors in German",
+    xpReward: 10,
+    estimatedMinutes: 5,
+    goals: ["Name common colors in German", "Describe objects using German colors"],
+    vocabulary: [
+      { word: "rot", translation: "red", pronunciation: "ROHT", example: "Eine rote Rose.", exampleTranslation: "A red rose." },
+      { word: "blau", translation: "blue", pronunciation: "BLOW", example: "Der blaue Himmel.", exampleTranslation: "The blue sky." },
+      { word: "grün", translation: "green", pronunciation: "GROON", example: "Ein grüner Baum.", exampleTranslation: "A green tree." },
+      { word: "weiß", translation: "white", pronunciation: "VISS", example: "Ein weißes Hemd.", exampleTranslation: "A white shirt." },
+      { word: "schwarz", translation: "black", pronunciation: "SHVARTS", example: "Eine schwarze Katze.", exampleTranslation: "A black cat." },
+    ],
+    phrases: [],
+    activities: [
+      { id: "de-1-5-a1", type: "vocabulary", question: "What does 'blau' mean?", correctAnswer: "blue", options: ["red", "blue", "green", "white"] },
+      { id: "de-1-5-a2", type: "translate", question: "Translate: black", correctAnswer: "schwarz", options: ["rot", "grün", "weiß", "schwarz"] },
+    ],
+    aiTeacherPrompt:
+      "You are Max, a friendly German teacher. Teach the student German colors: rot, blau, grün, weiß, schwarz, gelb, orange. Describe objects using colors. Make it interactive and visual.",
+  },
+
+  // ─── German › Unit 1 › Lesson 6 ────────────────────────────────────────────
+  {
+    id: "de-1-6",
+    unitId: "de-unit-1",
+    order: 6,
+    title: "Wochentage: Days of the Week",
+    description: "Learn the days of the week in German",
+    xpReward: 10,
+    estimatedMinutes: 6,
+    goals: ["Name all days of the week in German", "Say what day it is today"],
+    vocabulary: [
+      { word: "Montag", translation: "Monday", pronunciation: "MON-tahk", example: "Am Montag arbeite ich.", exampleTranslation: "On Monday I work." },
+      { word: "Mittwoch", translation: "Wednesday", pronunciation: "MIT-vokh", example: "Mittwoch ist Markttag.", exampleTranslation: "Wednesday is market day." },
+      { word: "Freitag", translation: "Friday", pronunciation: "FRY-tahk", example: "Am Freitag gehen wir aus.", exampleTranslation: "On Friday we go out." },
+      { word: "Sonntag", translation: "Sunday", pronunciation: "ZON-tahk", example: "Am Sonntag ruhe ich mich aus.", exampleTranslation: "On Sunday I rest." },
+    ],
+    phrases: [
+      { phrase: "Welcher Tag ist heute?", translation: "What day is today?", pronunciation: "VEL-kher tahk ist HOY-tuh", context: "Asking what day of the week it is" },
+      { phrase: "Heute ist Montag.", translation: "Today is Monday.", pronunciation: "HOY-tuh ist MON-tahk", context: "Stating today's day" },
+    ],
+    activities: [
+      { id: "de-1-6-a1", type: "vocabulary", question: "What does 'Freitag' mean?", correctAnswer: "Friday", options: ["Monday", "Wednesday", "Friday", "Sunday"] },
+      { id: "de-1-6-a2", type: "translate", question: "Translate: Sunday", correctAnswer: "Sonntag", options: ["Montag", "Mittwoch", "Freitag", "Sonntag"] },
+    ],
+    aiTeacherPrompt:
+      "You are Max, a friendly German teacher. Teach the student the German days of the week: Montag, Dienstag, Mittwoch, Donnerstag, Freitag, Samstag, Sonntag. Note that all days end in -tag (meaning day).",
+  },
+
+  // ─── Portuguese › Unit 1 › Lesson 1 ────────────────────────────────────────
+  {
+    id: "pt-1-1",
+    unitId: "pt-unit-1",
+    order: 1,
+    title: "Olá! Greetings",
+    description: "Learn how to greet people in Portuguese",
+    xpReward: 10,
+    estimatedMinutes: 5,
+    goals: ["Say hello and goodbye in Portuguese", "Greet people at different times of day"],
+    vocabulary: [
+      { word: "olá", translation: "hello", pronunciation: "oh-LAH", example: "Olá, tudo bem?", exampleTranslation: "Hello, how are you?" },
+      { word: "bom dia", translation: "good morning", pronunciation: "bom JEE-ah", example: "Bom dia, professor!", exampleTranslation: "Good morning, professor!" },
+      { word: "boa tarde", translation: "good afternoon", pronunciation: "BOH-ah TAR-deh", example: "Boa tarde a todos!", exampleTranslation: "Good afternoon, everyone!" },
+      { word: "boa noite", translation: "good evening / good night", pronunciation: "BOH-ah NOY-chee", example: "Boa noite, família.", exampleTranslation: "Good night, family." },
+      { word: "tchau", translation: "bye", pronunciation: "chow", example: "Tchau! Até logo.", exampleTranslation: "Bye! See you soon." },
+    ],
+    phrases: [
+      { phrase: "Tudo bem?", translation: "How are you? / All good?", pronunciation: "TOO-doo beng", context: "Very common Brazilian greeting" },
+      { phrase: "Tudo bem, obrigado!", translation: "All good, thank you!", pronunciation: "TOO-doo beng, oh-bree-GAH-doo", context: "Positive response to 'tudo bem'" },
+    ],
+    activities: [
+      { id: "pt-1-1-a1", type: "vocabulary", question: "What does 'bom dia' mean?", correctAnswer: "good morning", options: ["good morning", "good afternoon", "good night", "goodbye"] },
+      { id: "pt-1-1-a2", type: "translate", question: "Translate: bye", correctAnswer: "tchau", options: ["olá", "tudo bem", "tchau", "boa noite"] },
+    ],
+    aiTeacherPrompt:
+      "You are Sofia, a friendly Brazilian Portuguese teacher. Teach the student Portuguese greetings: 'olá', 'bom dia', 'boa tarde', 'boa noite', 'tchau'. Make it warm and friendly like Brazilian culture.",
+  },
+
+  // ─── Portuguese › Unit 1 › Lesson 2 ────────────────────────────────────────
+  {
+    id: "pt-1-2",
+    unitId: "pt-unit-1",
+    order: 2,
+    title: "Meu nome é… Introductions",
+    description: "Learn how to introduce yourself in Portuguese",
+    xpReward: 10,
+    estimatedMinutes: 6,
+    goals: ["Say your name in Portuguese", "Ask someone's name", "Say where you're from"],
+    vocabulary: [
+      { word: "meu nome é", translation: "my name is", pronunciation: "MEH-oo NO-mee eh", example: "Meu nome é Carlos.", exampleTranslation: "My name is Carlos." },
+      { word: "eu sou de", translation: "I am from", pronunciation: "eh-oo SOH jee", example: "Eu sou de São Paulo.", exampleTranslation: "I am from São Paulo." },
+      { word: "prazer", translation: "nice to meet you", pronunciation: "prah-ZEHR", example: "Muito prazer em conhecê-lo!", exampleTranslation: "Very nice to meet you!" },
+    ],
+    phrases: [
+      { phrase: "Como você se chama?", translation: "What is your name?", pronunciation: "KO-moo vo-SEH see SHA-mah", context: "Asking someone's name in Brazilian Portuguese" },
+      { phrase: "De onde você é?", translation: "Where are you from?", pronunciation: "jee ON-jee vo-SEH eh", context: "Asking about someone's origin" },
+    ],
+    activities: [
+      { id: "pt-1-2-a1", type: "translate", question: "Translate: my name is", correctAnswer: "meu nome é", options: ["eu sou de", "meu nome é", "prazer", "olá"] },
+      { id: "pt-1-2-a2", type: "vocabulary", question: "How do you say 'nice to meet you' in Portuguese?", correctAnswer: "prazer", options: ["tchau", "obrigado", "prazer", "tudo bem"] },
+    ],
+    aiTeacherPrompt:
+      "You are Sofia, a friendly Brazilian Portuguese teacher. Teach the student Portuguese introductions: 'meu nome é', 'eu sou de', 'prazer'. Practice a short introduction dialogue.",
+  },
+
+  // ─── Portuguese › Unit 1 › Lesson 3 ────────────────────────────────────────
+  {
+    id: "pt-1-3",
+    unitId: "pt-unit-1",
+    order: 3,
+    title: "Por favor & Obrigado! Politeness",
+    description: "Master Portuguese courtesy expressions",
+    xpReward: 10,
+    estimatedMinutes: 5,
+    goals: ["Say please and thank you in Portuguese", "Use polite expressions naturally"],
+    vocabulary: [
+      { word: "por favor", translation: "please", pronunciation: "por fa-VOR", example: "Uma água, por favor.", exampleTranslation: "A water, please." },
+      { word: "obrigado / obrigada", translation: "thank you (m/f)", pronunciation: "oh-bree-GAH-doo / dah", example: "Obrigado pela ajuda!", exampleTranslation: "Thank you for your help!" },
+      { word: "de nada", translation: "you're welcome", pronunciation: "jee NAH-dah", example: "—Obrigado. —De nada!", exampleTranslation: "—Thank you. —You're welcome!" },
+      { word: "com licença", translation: "excuse me", pronunciation: "kong lee-SEN-sah", example: "Com licença, posso passar?", exampleTranslation: "Excuse me, may I pass?" },
+    ],
+    phrases: [],
+    activities: [
+      { id: "pt-1-3-a1", type: "vocabulary", question: "What does 'obrigado' mean?", correctAnswer: "thank you (m/f)", options: ["please", "thank you (m/f)", "you're welcome", "excuse me"] },
+      { id: "pt-1-3-a2", type: "fill_blank", question: "Uma água, ___ favor.", correctAnswer: "por", options: ["por", "de", "com", "sem"] },
+    ],
+    aiTeacherPrompt:
+      "You are Sofia, a friendly Brazilian Portuguese teacher. Teach the student Portuguese politeness: 'por favor', 'obrigado/obrigada', 'de nada', 'com licença'. Explain why obrigado/obrigada changes based on speaker gender.",
+  },
+
+  // ─── Portuguese › Unit 1 › Lesson 4 ────────────────────────────────────────
+  {
+    id: "pt-1-4",
+    unitId: "pt-unit-1",
+    order: 4,
+    title: "Números: Numbers 1–10",
+    description: "Count from one to ten in Portuguese",
+    xpReward: 10,
+    estimatedMinutes: 5,
+    goals: ["Count from 1 to 10 in Portuguese", "Recognize Portuguese number words"],
+    vocabulary: [
+      { word: "um / uma", translation: "one", pronunciation: "oong / OO-mah", example: "Um café, por favor.", exampleTranslation: "One coffee, please." },
+      { word: "dois / duas", translation: "two", pronunciation: "doysh / DOO-ahs", example: "Dois bilhetes.", exampleTranslation: "Two tickets." },
+      { word: "três", translation: "three", pronunciation: "trehsh", example: "Três amigos.", exampleTranslation: "Three friends." },
+      { word: "cinco", translation: "five", pronunciation: "SING-koo", example: "Cinco minutos.", exampleTranslation: "Five minutes." },
+      { word: "dez", translation: "ten", pronunciation: "dehsh", example: "Dez reais.", exampleTranslation: "Ten reais." },
+    ],
+    phrases: [],
+    activities: [
+      { id: "pt-1-4-a1", type: "vocabulary", question: "What does 'três' mean?", correctAnswer: "three", options: ["one", "two", "three", "four"] },
+      { id: "pt-1-4-a2", type: "translate", question: "Translate: ten", correctAnswer: "dez", options: ["cinco", "seis", "oito", "dez"] },
+    ],
+    aiTeacherPrompt:
+      "You are Sofia, a friendly Brazilian Portuguese teacher. Teach the student Portuguese numbers 1 through 10. Note that um/uma and dois/duas have masculine and feminine forms. Use counting games to make it memorable.",
+  },
+
+  // ─── Portuguese › Unit 1 › Lesson 5 ────────────────────────────────────────
+  {
+    id: "pt-1-5",
+    unitId: "pt-unit-1",
+    order: 5,
+    title: "Cores: Colors",
+    description: "Learn the most common colors in Portuguese",
+    xpReward: 10,
+    estimatedMinutes: 5,
+    goals: ["Name common colors in Portuguese", "Describe objects using colors"],
+    vocabulary: [
+      { word: "vermelho", translation: "red", pronunciation: "vehr-MEL-yoo", example: "Uma rosa vermelha.", exampleTranslation: "A red rose." },
+      { word: "azul", translation: "blue", pronunciation: "ah-ZOOL", example: "O céu é azul.", exampleTranslation: "The sky is blue." },
+      { word: "verde", translation: "green", pronunciation: "VEH-dee", example: "Uma árvore verde.", exampleTranslation: "A green tree." },
+      { word: "branco", translation: "white", pronunciation: "BRAN-koo", example: "Uma camisa branca.", exampleTranslation: "A white shirt." },
+      { word: "preto", translation: "black", pronunciation: "PREH-too", example: "Um gato preto.", exampleTranslation: "A black cat." },
+    ],
+    phrases: [],
+    activities: [
+      { id: "pt-1-5-a1", type: "vocabulary", question: "What does 'vermelho' mean?", correctAnswer: "red", options: ["red", "blue", "green", "white"] },
+      { id: "pt-1-5-a2", type: "translate", question: "Translate: black", correctAnswer: "preto", options: ["vermelho", "azul", "verde", "preto"] },
+    ],
+    aiTeacherPrompt:
+      "You are Sofia, a friendly Brazilian Portuguese teacher. Teach the student Portuguese colors: vermelho, azul, verde, branco, preto, amarelo, laranja. Describe colorful things in Brazil like the flag. Make it vivid!",
+  },
+
+  // ─── Portuguese › Unit 1 › Lesson 6 ────────────────────────────────────────
+  {
+    id: "pt-1-6",
+    unitId: "pt-unit-1",
+    order: 6,
+    title: "Família: Family",
+    description: "Learn how to talk about family in Portuguese",
+    xpReward: 10,
+    estimatedMinutes: 6,
+    goals: ["Name family members in Portuguese", "Talk about your family"],
+    vocabulary: [
+      { word: "mãe", translation: "mother", pronunciation: "mang", example: "Minha mãe é professora.", exampleTranslation: "My mother is a teacher." },
+      { word: "pai", translation: "father", pronunciation: "py", example: "Meu pai trabalha muito.", exampleTranslation: "My father works a lot." },
+      { word: "irmão / irmã", translation: "brother / sister", pronunciation: "eer-MONG / eer-MAH", example: "Tenho um irmão.", exampleTranslation: "I have one brother." },
+      { word: "avó / avô", translation: "grandmother / grandfather", pronunciation: "ah-VOH / ah-VOH", example: "Minha avó faz bolo delicioso.", exampleTranslation: "My grandmother makes delicious cake." },
+    ],
+    phrases: [
+      { phrase: "Tenho uma família grande.", translation: "I have a big family.", pronunciation: "TEN-yoo OO-mah fah-MEE-lyah GRAN-jee", context: "Talking about family size" },
+    ],
+    activities: [
+      { id: "pt-1-6-a1", type: "vocabulary", question: "What does 'mãe' mean?", correctAnswer: "mother", options: ["father", "mother", "brother", "grandmother"] },
+      { id: "pt-1-6-a2", type: "translate", question: "Translate: father", correctAnswer: "pai", options: ["mãe", "pai", "irmão", "avô"] },
+    ],
+    aiTeacherPrompt:
+      "You are Sofia, a friendly Brazilian Portuguese teacher. Teach the student Portuguese family vocabulary: mãe, pai, irmão, irmã, avó, avô. Family is very important in Brazilian culture — share that warmth!",
   },
 ];

@@ -1,4 +1,5 @@
 import earth from "@/assets/images/earth.png";
+import lessonHero from "@/assets/images/lesson-hero.png";
 import mascotLogo from "@/assets/images/mascot-logo.png";
 import mascotWelcome from "@/assets/images/mascot-welcome.png";
 import palace from "@/assets/images/palace.png";
@@ -12,4 +13,5 @@ export const images = {
   palace,
   treasure,
   streakFire,
+  lessonHero,
 };
