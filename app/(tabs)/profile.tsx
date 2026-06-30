@@ -2,12 +2,15 @@ import { useClerk } from "@clerk/expo";
 import { useRouter } from "expo-router";
 import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
+import { useLanguageStore } from "@/store/useLanguageStore";
 
 export default function ProfileScreen() {
   const { signOut } = useClerk();
   const router = useRouter();
+  const clearSelectedLanguage = useLanguageStore((s) => s.clearSelectedLanguage);
 
   const handleSignOut = async () => {
+    clearSelectedLanguage();
     await signOut();
     router.replace("/onboarding");
   };

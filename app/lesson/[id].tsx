@@ -1,10 +1,11 @@
 import { useUser } from "@clerk/expo";
-import { Ionicons, MaterialCommunityIcons } from "@expo/vector-icons";
+import { Ionicons } from "@expo/vector-icons";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { useCallback, useEffect, useRef, useState } from "react";
 import {
   ActivityIndicator,
   Image,
+  Pressable,
   ScrollView,
   StyleSheet,
   Text,
@@ -27,6 +28,14 @@ try {
   // Expo Go: Stream features disabled
 }
 
+// useCall is in the bindings package (re-exported via the SDK's peer dep)
+let _bindings: any = null;
+try {
+  _bindings = require("@stream-io/video-react-bindings");
+} catch {
+  // Expo Go fallback
+}
+
 const CallingState: Record<string, string> = _sdk?.CallingState ?? {
   LEFT: "left",
   JOINING: "joining",
@@ -46,9 +55,20 @@ const useCallStateHooks: () => any =
 const useStreamVideoClient: () => any =
   _sdk?.useStreamVideoClient ?? (() => undefined);
 
+// callManager controls the native audio session (speaker vs earpiece routing)
+const callManager: any = _sdk?.callManager ?? null;
+
+const useCall: () => any = _bindings?.useCall ?? (() => undefined);
+
 // ─── Types ───────────────────────────────────────────────────────────────────
 
 type CallPhase = "connecting" | "joined" | "error" | "ended";
+
+type Caption = {
+  id: string;
+  speaker: "teacher" | "student";
+  text: string;
+};
 type AgentStatus = "idle" | "connecting" | "connected" | "failed";
 
 const LANGUAGE_NAMES: Record<LanguageCode, string> = {
@@ -90,41 +110,6 @@ function AgentStatusBadge({ status }: { status: AgentStatus }) {
   );
 }
 
-function ControlButton({
-  icon,
-  label,
-  active = true,
-  endCall = false,
-  disabled = false,
-  onPress,
-}: {
-  icon: React.ReactNode;
-  label: string;
-  active?: boolean;
-  endCall?: boolean;
-  disabled?: boolean;
-  onPress: () => void;
-}) {
-  return (
-    <View style={styles.controlItem}>
-      <TouchableOpacity
-        style={[
-          styles.controlCircle,
-          endCall && styles.controlEnd,
-          !active && !endCall && styles.controlInactive,
-          disabled && styles.controlDisabled,
-        ]}
-        onPress={onPress}
-        activeOpacity={0.8}
-        disabled={disabled}
-      >
-        {icon}
-      </TouchableOpacity>
-      <Text style={styles.controlLabel}>{label}</Text>
-    </View>
-  );
-}
-
 function FeedbackItem({
   label,
   value,
@@ -149,7 +134,6 @@ function LessonCallUI({
   phase,
   error,
   agentStatus,
-  onEndCall,
   userName,
   userImage,
   screenWidth,
@@ -158,17 +142,36 @@ function LessonCallUI({
   phase: CallPhase;
   error: string | undefined;
   agentStatus: AgentStatus;
-  onEndCall: () => void;
   userName: string;
   userImage?: string;
   screenWidth: number;
 }) {
   const { useMicrophoneState, useCallCallingState } = useCallStateHooks();
-  const { isMute, microphone } = useMicrophoneState();
+  const { microphone } = useMicrophoneState();
   const callingState = useCallCallingState();
+  const call = useCall();
 
-  const [cameraActive, setCameraActive] = useState(false);
-  const [subtitlesActive, setSubtitlesActive] = useState(false);
+  const [isPressing, setIsPressing] = useState(false);
+  const [captions, setCaptions] = useState<Caption[]>([]);
+
+  // Subscribe to custom events from the Vision Agent and collect live captions
+  useEffect(() => {
+    if (!call) return;
+    const off = call.on("custom", (event: any) => {
+      const data = event?.custom ?? {};
+      if (data.type !== "lingua.caption" || !data.text) return;
+      setCaptions((prev) => {
+        const entry: Caption = {
+          id: `${Date.now()}-${Math.random()}`,
+          speaker: data.speaker === "teacher" ? "teacher" : "student",
+          text: data.text,
+        };
+        // Keep the last 4 captions so the panel stays compact
+        return [...prev.slice(-3), entry];
+      });
+    });
+    return () => off?.();
+  }, [call]);
 
   const isConnecting =
     phase === "connecting" ||
@@ -187,8 +190,14 @@ function LessonCallUI({
       ? "#EF4444"
       : "#21C16B";
 
-  const handleMicToggle = useCallback(async () => {
-    await microphone.toggle().catch(console.error);
+  const handleMicPressIn = useCallback(async () => {
+    setIsPressing(true);
+    await microphone.enable().catch(console.error);
+  }, [microphone]);
+
+  const handleMicPressOut = useCallback(async () => {
+    setIsPressing(false);
+    await microphone.disable().catch(console.error);
   }, [microphone]);
 
   const firstPhrase = lesson.phrases[0];
@@ -277,55 +286,53 @@ function LessonCallUI({
         </View>
       </View>
 
-      {/* ── CONTROLS ──────────────────────────────────────────────────── */}
-      <View style={styles.controlsRow}>
-        <ControlButton
-          icon={<Ionicons name="videocam" size={22} color="#FFFFFF" />}
-          label="Camera"
-          active={cameraActive}
-          disabled={isConnecting}
-          onPress={() => setCameraActive(!cameraActive)}
-        />
-        <ControlButton
-          icon={
-            <Ionicons
-              name={isMute ? "mic-off" : "mic"}
-              size={22}
-              color="#FFFFFF"
-            />
-          }
-          label={isMute ? "Unmute" : "Mute"}
-          active={!isMute}
+      {/* ── PUSH-TO-TALK ──────────────────────────────────────────────── */}
+      <View style={styles.pttContainer}>
+        <Pressable
+          onPressIn={handleMicPressIn}
+          onPressOut={handleMicPressOut}
           disabled={isConnecting || hasError}
-          onPress={handleMicToggle}
-        />
-        <ControlButton
-          icon={
-            <MaterialCommunityIcons
-              name="translate"
-              size={22}
-              color="#FFFFFF"
-            />
-          }
-          label="Subtitles"
-          active={subtitlesActive}
-          disabled={isConnecting}
-          onPress={() => setSubtitlesActive(!subtitlesActive)}
-        />
-        <ControlButton
-          icon={
-            <Ionicons
-              name="call"
-              size={22}
-              color="#FFFFFF"
-              style={styles.hangupIcon}
-            />
-          }
-          label="End Call"
-          endCall
-          onPress={onEndCall}
-        />
+          style={[
+            styles.pttButton,
+            isPressing && styles.pttButtonActive,
+            (isConnecting || hasError) && styles.pttButtonDisabled,
+          ]}
+        >
+          <Ionicons
+            name={isPressing ? "mic" : "mic-outline"}
+            size={36}
+            color="#FFFFFF"
+          />
+        </Pressable>
+        <Text style={styles.pttLabel}>
+          {isPressing ? "Listening..." : "Hold to speak"}
+        </Text>
       </View>
+
+      {/* ── LIVE CAPTIONS ─────────────────────────────────────────────── */}
+      {captions.length > 0 && (
+        <View style={styles.captionsCard}>
+          <View style={styles.captionsHeader}>
+            <View style={styles.captionsDot} />
+            <Text style={styles.captionsTitle}>Live Captions</Text>
+          </View>
+          {captions.map((c) => (
+            <View key={c.id} style={styles.captionRow}>
+              <Text
+                style={[
+                  styles.captionSpeaker,
+                  {
+                    color: c.speaker === "teacher" ? "#6C4EF5" : "#0D132B",
+                  },
+                ]}
+              >
+                {c.speaker === "teacher" ? "AI Teacher" : "You"}
+              </Text>
+              <Text style={styles.captionText}>{c.text}</Text>
+            </View>
+          ))}
+        </View>
+      )}
 
       {/* ── FEEDBACK CARD ─────────────────────────────────────────────── */}
       {!hasError && (
@@ -411,9 +418,14 @@ export default function LessonScreen() {
     setAgentStatus("idle");
 
     c.join({ create: true })
-      .then(() => {
-        // Audio-only lesson: disable camera
-        c.camera.disable().catch(console.error);
+      .then(async () => {
+        // Start native audio session routed to loudspeaker (not earpiece)
+        callManager?.start({ audioRole: "communicator", deviceEndpointType: "speaker" });
+
+        // Audio-only lesson: disable camera, start mic muted (PTT pattern)
+        await c.camera.disable().catch(console.error);
+        await c.microphone.disable().catch(console.error);
+
         setPhase("joined");
         // Start the Vision Agent (non-blocking)
         void startAgent(callId, lesson, user.id);
@@ -424,6 +436,9 @@ export default function LessonScreen() {
       });
 
     return () => {
+      // Release the native audio session
+      callManager?.stop();
+
       // Stop the agent session (fire-and-forget)
       const sessionId = agentSessionRef.current;
       if (sessionId) {
@@ -444,6 +459,9 @@ export default function LessonScreen() {
 
   const handleEndCall = useCallback(async () => {
     const callId = `lesson-${id}-${user?.id ?? ""}`;
+
+    // Release the native audio session
+    callManager?.stop();
 
     // Stop the agent session
     const sessionId = agentSessionRef.current;
@@ -515,17 +533,19 @@ export default function LessonScreen() {
           </View>
         </View>
 
-        <View style={styles.headerIcons}>
-          <View style={styles.iconCircle}>
-            <Ionicons name="videocam-outline" size={16} color="#0D132B" />
-          </View>
-          <View style={styles.iconCircle}>
-            <Text style={styles.iconCircleText}>12</Text>
-          </View>
-          <View style={styles.iconCircle}>
-            <Ionicons name="notifications-outline" size={16} color="#0D132B" />
-          </View>
-        </View>
+        <TouchableOpacity
+          onPress={handleEndCall}
+          style={styles.endCallBtn}
+          activeOpacity={0.8}
+        >
+          <Ionicons
+            name="call"
+            size={18}
+            color="#FFFFFF"
+            style={styles.hangupIcon}
+          />
+          <Text style={styles.endCallBtnText}>End</Text>
+        </TouchableOpacity>
       </View>
 
       {/* ── CALL CONTENT ────────────────────────────────────────────────── */}
@@ -536,7 +556,6 @@ export default function LessonScreen() {
             phase={phase}
             error={error}
             agentStatus={agentStatus}
-            onEndCall={handleEndCall}
             userName={userName}
             userImage={userImage}
             screenWidth={screenWidth}
@@ -601,25 +620,19 @@ const styles = StyleSheet.create({
     fontFamily: "Poppins_400Regular",
     fontSize: 13,
   },
-  headerIcons: {
+  endCallBtn: {
     flexDirection: "row",
-    gap: 8,
     alignItems: "center",
+    gap: 6,
+    backgroundColor: "#EF4444",
+    paddingHorizontal: 14,
+    paddingVertical: 8,
+    borderRadius: 20,
   },
-  iconCircle: {
-    width: 36,
-    height: 36,
-    borderRadius: 18,
-    borderWidth: 1.5,
-    borderColor: "#E5E7EB",
-    backgroundColor: "#FFFFFF",
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  iconCircleText: {
+  endCallBtnText: {
     fontFamily: "Poppins_600SemiBold",
-    fontSize: 13,
-    color: "#0D132B",
+    fontSize: 14,
+    color: "#FFFFFF",
   },
 
   // ── Loading (before call object exists)
@@ -771,44 +784,88 @@ const styles = StyleSheet.create({
     fontSize: 12,
   },
 
-  // ── Controls
-  controlsRow: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "flex-start",
-    paddingHorizontal: 8,
-    width: "100%",
-  },
-  controlItem: {
+  // ── Push-to-talk
+  pttContainer: {
     alignItems: "center",
-    gap: 8,
-    flex: 1,
+    gap: 12,
+    paddingVertical: 8,
   },
-  controlCircle: {
-    width: 62,
-    height: 62,
-    borderRadius: 31,
+  pttButton: {
+    width: 88,
+    height: 88,
+    borderRadius: 44,
     backgroundColor: "#1C1C1E",
     alignItems: "center",
     justifyContent: "center",
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.18,
+    shadowRadius: 12,
+    elevation: 6,
   },
-  controlInactive: {
-    backgroundColor: "#4B5563",
+  pttButtonActive: {
+    backgroundColor: "#6C4EF5",
+    shadowColor: "#6C4EF5",
+    shadowOpacity: 0.4,
+    shadowRadius: 16,
   },
-  controlDisabled: {
+  pttButtonDisabled: {
     opacity: 0.4,
   },
-  controlEnd: {
-    backgroundColor: "#EF4444",
-  },
-  controlLabel: {
-    fontFamily: "Poppins_400Regular",
-    fontSize: 12,
+  pttLabel: {
+    fontFamily: "Poppins_500Medium",
+    fontSize: 14,
     color: "#6B7280",
-    textAlign: "center",
   },
   hangupIcon: {
     transform: [{ rotate: "135deg" }],
+  },
+
+  // ── Live Captions
+  captionsCard: {
+    backgroundColor: "#FFFFFF",
+    borderRadius: 20,
+    paddingHorizontal: 16,
+    paddingVertical: 14,
+    width: "100%",
+    gap: 10,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.06,
+    shadowRadius: 10,
+    elevation: 3,
+  },
+  captionsHeader: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 6,
+    marginBottom: 2,
+  },
+  captionsDot: {
+    width: 8,
+    height: 8,
+    borderRadius: 4,
+    backgroundColor: "#21C16B",
+  },
+  captionsTitle: {
+    fontFamily: "Poppins_600SemiBold",
+    fontSize: 12,
+    color: "#6B7280",
+    letterSpacing: 0.4,
+    textTransform: "uppercase",
+  },
+  captionRow: {
+    gap: 2,
+  },
+  captionSpeaker: {
+    fontFamily: "Poppins_600SemiBold",
+    fontSize: 12,
+  },
+  captionText: {
+    fontFamily: "Poppins_400Regular",
+    fontSize: 14,
+    color: "#0D132B",
+    lineHeight: 20,
   },
 
   // ── Feedback
