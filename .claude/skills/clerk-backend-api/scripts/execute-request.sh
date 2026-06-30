@@ -25,8 +25,6 @@ parse_env_file() {
       value="${value%\"}"
       value="${value#\'}"
       value="${value%\'}"
-      value="${value#${value%%[![:space:]]*}}"
-      value="${value%${value##*[![:space:]]}}"
       case "$key" in
         CLERK_SECRET_KEY|CLERK_BAPI_SCOPES|CLERK_REST_API_URL)
           export "$key=$value"

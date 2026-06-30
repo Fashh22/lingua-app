@@ -2,6 +2,7 @@ import "../global.css";
 
 import { ClerkProvider } from "@clerk/expo";
 import { tokenCache } from "@clerk/expo/token-cache";
+import { StreamVideoProvider } from "@/components/StreamVideoProvider";
 import {
   Poppins_400Regular,
   Poppins_500Medium,
@@ -45,12 +46,16 @@ export default function RootLayout() {
   return shouldUsePostHog ? (
     <PostHogProvider apiKey={posthogKey!} options={{ host: posthogHost! }}>
       <ClerkProvider publishableKey={publishableKey} tokenCache={tokenCache}>
-        <Stack screenOptions={{ headerShown: false }} />
+        <StreamVideoProvider>
+          <Stack screenOptions={{ headerShown: false }} />
+        </StreamVideoProvider>
       </ClerkProvider>
     </PostHogProvider>
   ) : (
     <ClerkProvider publishableKey={publishableKey} tokenCache={tokenCache}>
-      <Stack screenOptions={{ headerShown: false }} />
+      <StreamVideoProvider>
+        <Stack screenOptions={{ headerShown: false }} />
+      </StreamVideoProvider>
     </ClerkProvider>
   );
 }

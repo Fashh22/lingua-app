@@ -2,20 +2,20 @@ import { Ionicons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
 import { useState } from "react";
 import {
-  Image,
-  ScrollView,
-  StyleSheet,
-  Text,
-  TouchableOpacity,
-  View,
-  useWindowDimensions,
+    Image,
+    ScrollView,
+    StyleSheet,
+    Text,
+    TouchableOpacity,
+    View,
+    useWindowDimensions,
 } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
 
 const { width: heroImgW, height: heroImgH } = Image.resolveAssetSource(
-  require("@/assets/images/lesson-hero.png")
+  require("@/assets/images/lesson-hero.png"),
 );
 const HERO_ASPECT_RATIO = heroImgW / heroImgH;
-import { SafeAreaView } from "react-native-safe-area-context";
 
 import { LessonCard, LessonStatus } from "@/components/LessonCard";
 import { images } from "@/constants/images";
@@ -36,32 +36,38 @@ export default function LearnScreen() {
   const heroHeight = screenWidth / HERO_ASPECT_RATIO;
   const router = useRouter();
 
-  const { selectedLanguage } = useLanguageStore();
+  const { selectedLanguage, hasHydrated } = useLanguageStore();
   const { completedLessons } = useProgressStore();
 
-  const language = languages.find((l) => l.code === selectedLanguage);
+  const language = hasHydrated
+    ? languages.find((l) => l.code === selectedLanguage)
+    : null;
 
-  const languageUnits = units
-    .filter((u) => u.languageCode === selectedLanguage)
-    .sort((a, b) => a.order - b.order);
+  const languageUnits = hasHydrated
+    ? units
+        .filter((u) => u.languageCode === selectedLanguage)
+        .sort((a, b) => a.order - b.order)
+    : [];
 
-  const allLessons = languageUnits.flatMap((unit) =>
-    unit.lessonIds
-      .map((id) => lessons.find((l) => l.id === id))
-      .filter((l): l is Lesson => l !== undefined)
-  );
+  const allLessons = hasHydrated
+    ? languageUnits.flatMap((unit) =>
+        unit.lessonIds
+          .map((id) => lessons.find((l) => l.id === id))
+          .filter((l): l is Lesson => l !== undefined),
+      )
+    : [];
 
-  const completedCount = allLessons.filter((l) =>
-    completedLessons.includes(l.id)
-  ).length;
+  const completedCount = hasHydrated
+    ? allLessons.filter((l) => completedLessons.includes(l.id)).length
+    : 0;
 
   const firstIncompleteId = allLessons.find(
-    (l) => !completedLessons.includes(l.id)
+    (l) => !completedLessons.includes(l.id),
   )?.id;
 
   const activeUnit =
     languageUnits.find(
-      (u) => firstIncompleteId && u.lessonIds.includes(firstIncompleteId)
+      (u) => firstIncompleteId && u.lessonIds.includes(firstIncompleteId),
     ) ?? languageUnits[0];
 
   const getStatus = (lessonId: string): LessonStatus => {
@@ -69,6 +75,10 @@ export default function LearnScreen() {
     if (lessonId === firstIncompleteId) return "in_progress";
     return "locked";
   };
+
+  if (!hasHydrated) {
+    return null;
+  }
 
   // ─── Empty state ──────────────────────────────────────────────────────────
 
@@ -101,8 +111,8 @@ export default function LearnScreen() {
             {activeUnit?.title ?? language.name}
           </Text>
           <Text style={styles.headerSubtitle}>
-            Unit {activeUnit?.order ?? 1} •{" "}
-            {completedCount} / {allLessons.length} lessons
+            Unit {activeUnit?.order ?? 1} • {completedCount} /{" "}
+            {allLessons.length} lessons
           </Text>
         </View>
         <TouchableOpacity activeOpacity={0.7} style={styles.bookmarkBtn}>
@@ -118,12 +128,17 @@ export default function LearnScreen() {
         <View style={styles.heroContainer}>
           <Image
             source={images.lessonHero}
-            style={[styles.heroImage, { width: screenWidth, height: heroHeight }]}
+            style={[
+              styles.heroImage,
+              { width: screenWidth, height: heroHeight },
+            ]}
             resizeMode="stretch"
           />
           {/* Unit theme badge */}
           <View style={styles.unitBadge}>
-            <Text style={styles.unitBadgeText}>{activeUnit?.theme ?? "📚"}</Text>
+            <Text style={styles.unitBadgeText}>
+              {activeUnit?.theme ?? "📚"}
+            </Text>
           </View>
         </View>
 
@@ -162,20 +177,24 @@ export default function LearnScreen() {
         {/* ── LESSONS LIST ──────────────────────────────────────────────── */}
         {activeTab === "lessons" && (
           <View style={styles.lessonList}>
-            {allLessons.map((lesson, index) => (
-              <LessonCard
-                key={lesson.id}
-                lesson={lesson}
-                lessonNumber={index + 1}
-                status={getStatus(lesson.id)}
-                onPress={() =>
-                  router.push({
-                    pathname: "/lesson/[id]",
-                    params: { id: lesson.id },
-                  })
-                }
-              />
-            ))}
+            {allLessons.map((lesson, index) => {
+              const status = getStatus(lesson.id);
+              return (
+                <LessonCard
+                  key={lesson.id}
+                  lesson={lesson}
+                  lessonNumber={index + 1}
+                  status={status}
+                  onPress={() => {
+                    if (status === "locked") return;
+                    router.push({
+                      pathname: "/lesson/[id]",
+                      params: { id: lesson.id },
+                    });
+                  }}
+                />
+              );
+            })}
           </View>
         )}
 

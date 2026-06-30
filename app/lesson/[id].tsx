@@ -1,7 +1,9 @@
+import { useUser } from "@clerk/expo";
 import { Ionicons, MaterialCommunityIcons } from "@expo/vector-icons";
 import { useLocalSearchParams, useRouter } from "expo-router";
-import { useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import {
+  ActivityIndicator,
   Image,
   ScrollView,
   StyleSheet,
@@ -14,20 +16,93 @@ import { SafeAreaView } from "react-native-safe-area-context";
 
 import { images } from "@/constants/images";
 import { lessons } from "@/data/lessons";
+import { getApiBaseUrl } from "@/lib/stream";
+import { LanguageCode } from "@/types/learning";
+
+// Lazy-load Stream SDK to support Expo Go (WebRTC requires a dev build)
+let _sdk: any = null;
+try {
+  _sdk = require("@stream-io/video-react-native-sdk");
+} catch {
+  // Expo Go: Stream features disabled
+}
+
+const CallingState: Record<string, string> = _sdk?.CallingState ?? {
+  LEFT: "left",
+  JOINING: "joining",
+  RECONNECTING: "reconnecting",
+};
+const StreamCall: React.ComponentType<any> =
+  _sdk?.StreamCall ?? (({ children }: any) => children);
+const useCallStateHooks: () => any =
+  _sdk?.useCallStateHooks ??
+  (() => ({
+    useMicrophoneState: () => ({
+      isMute: false,
+      microphone: { toggle: async () => {} },
+    }),
+    useCallCallingState: () => "idle",
+  }));
+const useStreamVideoClient: () => any =
+  _sdk?.useStreamVideoClient ?? (() => undefined);
+
+// ─── Types ───────────────────────────────────────────────────────────────────
+
+type CallPhase = "connecting" | "joined" | "error" | "ended";
+type AgentStatus = "idle" | "connecting" | "connected" | "failed";
+
+const LANGUAGE_NAMES: Record<LanguageCode, string> = {
+  es: "Spanish",
+  fr: "French",
+  de: "German",
+  ja: "Japanese",
+  pt: "Portuguese",
+};
+
+function getLessonLanguage(lessonId: string): string {
+  const prefix = lessonId.split("-")[0] as LanguageCode;
+  return LANGUAGE_NAMES[prefix] ?? "Spanish";
+}
 
 // ─── Sub-components ──────────────────────────────────────────────────────────
+
+function AgentStatusBadge({ status }: { status: AgentStatus }) {
+  if (status === "idle") return null;
+
+  const config =
+    status === "connecting"
+      ? { color: "#F59E0B", text: "AI Teacher joining...", spinner: true }
+      : status === "connected"
+        ? { color: "#21C16B", text: "AI Teacher connected", spinner: false }
+        : { color: "#EF4444", text: "AI Teacher unavailable", spinner: false };
+
+  return (
+    <View style={styles.agentBadge}>
+      {config.spinner ? (
+        <ActivityIndicator size={10} color={config.color} />
+      ) : (
+        <View style={[styles.agentBadgeDot, { backgroundColor: config.color }]} />
+      )}
+      <Text style={[styles.agentBadgeText, { color: config.color }]}>
+        {config.text}
+      </Text>
+    </View>
+  );
+}
 
 function ControlButton({
   icon,
   label,
   active = true,
   endCall = false,
+  disabled = false,
   onPress,
 }: {
   icon: React.ReactNode;
   label: string;
   active?: boolean;
   endCall?: boolean;
+  disabled?: boolean;
   onPress: () => void;
 }) {
   return (
@@ -37,9 +112,11 @@ function ControlButton({
           styles.controlCircle,
           endCall && styles.controlEnd,
           !active && !endCall && styles.controlInactive,
+          disabled && styles.controlDisabled,
         ]}
         onPress={onPress}
         activeOpacity={0.8}
+        disabled={disabled}
       >
         {icon}
       </TouchableOpacity>
@@ -65,28 +142,54 @@ function FeedbackItem({
   );
 }
 
-// ─── Screen ──────────────────────────────────────────────────────────────────
+// ─── Inner call UI (requires StreamCall context) ─────────────────────────────
 
-export default function LessonScreen() {
-  const { id } = useLocalSearchParams<{ id: string }>();
-  const router = useRouter();
-  const { width: screenWidth } = useWindowDimensions();
+function LessonCallUI({
+  lesson,
+  phase,
+  error,
+  agentStatus,
+  onEndCall,
+  userName,
+  userImage,
+  screenWidth,
+}: {
+  lesson: (typeof lessons)[number];
+  phase: CallPhase;
+  error: string | undefined;
+  agentStatus: AgentStatus;
+  onEndCall: () => void;
+  userName: string;
+  userImage?: string;
+  screenWidth: number;
+}) {
+  const { useMicrophoneState, useCallCallingState } = useCallStateHooks();
+  const { isMute, microphone } = useMicrophoneState();
+  const callingState = useCallCallingState();
 
-  const [micActive, setMicActive] = useState(true);
   const [cameraActive, setCameraActive] = useState(false);
   const [subtitlesActive, setSubtitlesActive] = useState(false);
 
-  const lesson = lessons.find((l) => l.id === id);
+  const isConnecting =
+    phase === "connecting" ||
+    callingState === CallingState.JOINING ||
+    callingState === CallingState.RECONNECTING;
+  const hasError = phase === "error";
 
-  if (!lesson) {
-    return (
-      <SafeAreaView style={styles.safe} edges={["top"]}>
-        <View style={styles.center}>
-          <Text style={styles.errorText}>Lesson not found.</Text>
-        </View>
-      </SafeAreaView>
-    );
-  }
+  const statusLabel = isConnecting
+    ? "Connecting..."
+    : hasError
+      ? "Connection failed"
+      : "Online";
+  const dotColor = isConnecting
+    ? "#F59E0B"
+    : hasError
+      ? "#EF4444"
+      : "#21C16B";
+
+  const handleMicToggle = useCallback(async () => {
+    await microphone.toggle().catch(console.error);
+  }, [microphone]);
 
   const firstPhrase = lesson.phrases[0];
   const firstVocab = lesson.vocabulary[0];
@@ -100,11 +203,302 @@ export default function LessonScreen() {
   const teacherAreaWidth = screenWidth - 32;
 
   return (
+    <ScrollView
+      showsVerticalScrollIndicator={false}
+      contentContainerStyle={styles.scroll}
+    >
+      {/* ── TEACHER VIEW ──────────────────────────────────────────────── */}
+      <View style={[styles.teacherArea, { width: teacherAreaWidth }]}>
+        {/* AI teacher mascot */}
+        <Image
+          source={images.mascotWelcome}
+          style={styles.mascotImage}
+          resizeMode="contain"
+        />
+
+        {/* Agent status badge */}
+        <AgentStatusBadge status={agentStatus} />
+
+        {/* Speech bubble */}
+        <View style={styles.bubble}>
+          <View style={styles.bubbleTextWrap}>
+            <Text style={styles.bubblePrimaryText}>{bubblePrimary}</Text>
+            <Text style={styles.bubbleSecondaryText}>
+              {bubbleSecondary} 👏
+            </Text>
+          </View>
+          <Ionicons name="volume-high" size={24} color="#6C4EF5" />
+        </View>
+
+        {/* Connecting overlay */}
+        {isConnecting && !hasError && (
+          <View style={styles.overlay}>
+            <ActivityIndicator size="large" color="#6C4EF5" />
+            <Text style={styles.overlayText}>Connecting to lesson...</Text>
+          </View>
+        )}
+
+        {/* Error overlay */}
+        {hasError && (
+          <View style={styles.overlay}>
+            <Ionicons name="alert-circle" size={40} color="#EF4444" />
+            <Text style={styles.overlayErrorText}>
+              {error ?? "Connection failed"}
+            </Text>
+            <Text style={styles.overlaySubText}>
+              Tap End Call to go back
+            </Text>
+          </View>
+        )}
+      </View>
+
+      {/* ── USER INFO ─────────────────────────────────────────────────── */}
+      <View style={styles.userRow}>
+        <View style={styles.userAvatarCircle}>
+          {userImage ? (
+            <Image
+              source={{ uri: userImage }}
+              style={styles.userAvatarImage}
+            />
+          ) : (
+            <Ionicons name="person" size={18} color="#6C4EF5" />
+          )}
+        </View>
+        <View>
+          <Text style={styles.userNameText} numberOfLines={1}>
+            {userName}
+          </Text>
+          <View style={styles.userStatusRow}>
+            <View style={[styles.statusDot, { backgroundColor: dotColor }]} />
+            <Text style={[styles.userStatusText, { color: dotColor }]}>
+              {statusLabel}
+            </Text>
+          </View>
+        </View>
+      </View>
+
+      {/* ── CONTROLS ──────────────────────────────────────────────────── */}
+      <View style={styles.controlsRow}>
+        <ControlButton
+          icon={<Ionicons name="videocam" size={22} color="#FFFFFF" />}
+          label="Camera"
+          active={cameraActive}
+          disabled={isConnecting}
+          onPress={() => setCameraActive(!cameraActive)}
+        />
+        <ControlButton
+          icon={
+            <Ionicons
+              name={isMute ? "mic-off" : "mic"}
+              size={22}
+              color="#FFFFFF"
+            />
+          }
+          label={isMute ? "Unmute" : "Mute"}
+          active={!isMute}
+          disabled={isConnecting || hasError}
+          onPress={handleMicToggle}
+        />
+        <ControlButton
+          icon={
+            <MaterialCommunityIcons
+              name="translate"
+              size={22}
+              color="#FFFFFF"
+            />
+          }
+          label="Subtitles"
+          active={subtitlesActive}
+          disabled={isConnecting}
+          onPress={() => setSubtitlesActive(!subtitlesActive)}
+        />
+        <ControlButton
+          icon={
+            <Ionicons
+              name="call"
+              size={22}
+              color="#FFFFFF"
+              style={styles.hangupIcon}
+            />
+          }
+          label="End Call"
+          endCall
+          onPress={onEndCall}
+        />
+      </View>
+
+      {/* ── FEEDBACK CARD ─────────────────────────────────────────────── */}
+      {!hasError && (
+        <View style={styles.feedbackCard}>
+          <FeedbackItem label="Speaking" value="Excellent" color="#21C16B" />
+          <View style={styles.feedbackDivider} />
+          <FeedbackItem
+            label="Pronunciation"
+            value="Great"
+            color="#6C4EF5"
+          />
+          <View style={styles.feedbackDivider} />
+          <FeedbackItem label="Grammar" value="Good" color="#6C4EF5" />
+        </View>
+      )}
+    </ScrollView>
+  );
+}
+
+// ─── Screen ──────────────────────────────────────────────────────────────────
+
+export default function LessonScreen() {
+  const { id } = useLocalSearchParams<{ id: string }>();
+  const router = useRouter();
+  const { width: screenWidth } = useWindowDimensions();
+  const { user } = useUser();
+  const client = useStreamVideoClient();
+
+  const [call, setCall] = useState<any>(undefined);
+  const [phase, setPhase] = useState<CallPhase>("connecting");
+  const [error, setError] = useState<string | undefined>();
+  const [agentStatus, setAgentStatus] = useState<AgentStatus>("idle");
+  const agentSessionRef = useRef<string | null>(null);
+
+  const lesson = lessons.find((l) => l.id === id);
+
+  const startAgent = useCallback(
+    async (callId: string, lessonData: (typeof lessons)[number], userId: string) => {
+      setAgentStatus("connecting");
+      try {
+        const res = await fetch(`${getApiBaseUrl()}/api/agent-start`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            callId,
+            callType: "audio_room",
+            userId,
+            language: getLessonLanguage(lessonData.id),
+            lessonId: lessonData.id,
+            goals: lessonData.goals,
+            vocabulary: lessonData.vocabulary.map((v) => ({
+              word: v.word,
+              translation: v.translation,
+            })),
+            phrases: lessonData.phrases.map((p) => ({
+              phrase: p.phrase,
+              translation: p.translation,
+            })),
+            aiTeacherPrompt: lessonData.aiTeacherPrompt,
+          }),
+        });
+        if (!res.ok) {
+          throw new Error(`Agent start failed: ${res.status}`);
+        }
+        const { sessionId } = (await res.json()) as { sessionId: string };
+        agentSessionRef.current = sessionId;
+        setAgentStatus("connected");
+      } catch (err) {
+        console.error("Agent start error:", err);
+        setAgentStatus("failed");
+      }
+    },
+    []
+  );
+
+  useEffect(() => {
+    if (!client || !user || !lesson) return;
+
+    const callId = `lesson-${id}-${user.id}`;
+    const c = client.call("audio_room", callId, { reuseInstance: true });
+    setCall(c);
+    setPhase("connecting");
+    setAgentStatus("idle");
+
+    c.join({ create: true })
+      .then(() => {
+        // Audio-only lesson: disable camera
+        c.camera.disable().catch(console.error);
+        setPhase("joined");
+        // Start the Vision Agent (non-blocking)
+        void startAgent(callId, lesson, user.id);
+      })
+      .catch((err: Error) => {
+        setError(err?.message ?? "Failed to connect to lesson");
+        setPhase("error");
+      });
+
+    return () => {
+      // Stop the agent session (fire-and-forget)
+      const sessionId = agentSessionRef.current;
+      if (sessionId) {
+        agentSessionRef.current = null;
+        fetch(`${getApiBaseUrl()}/api/agent-stop`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ callId, sessionId }),
+        }).catch(console.error);
+      }
+      // Leave the Stream call
+      if (c.state.callingState !== CallingState.LEFT) {
+        c.leave().catch(console.error);
+      }
+      setCall(undefined);
+    };
+  }, [client, user?.id, id]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  const handleEndCall = useCallback(async () => {
+    const callId = `lesson-${id}-${user?.id ?? ""}`;
+
+    // Stop the agent session
+    const sessionId = agentSessionRef.current;
+    if (sessionId) {
+      agentSessionRef.current = null;
+      fetch(`${getApiBaseUrl()}/api/agent-stop`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ callId, sessionId }),
+      }).catch(console.error);
+    }
+
+    // Leave the call
+    if (call && call.state.callingState !== CallingState.LEFT) {
+      await call.leave().catch(console.error);
+    }
+    setPhase("ended");
+    router.back();
+  }, [call, id, user?.id, router]);
+
+  if (!lesson) {
+    return (
+      <SafeAreaView style={styles.safe} edges={["top"]}>
+        <View style={styles.center}>
+          <Text style={styles.errorText}>Lesson not found.</Text>
+        </View>
+      </SafeAreaView>
+    );
+  }
+
+  const userName =
+    user?.fullName ??
+    user?.primaryEmailAddress?.emailAddress ??
+    "Student";
+  const userImage = user?.imageUrl;
+
+  const statusLabel =
+    phase === "connecting"
+      ? "Connecting..."
+      : phase === "error"
+        ? "Connection failed"
+        : "Online";
+  const dotColor =
+    phase === "connecting"
+      ? "#F59E0B"
+      : phase === "error"
+        ? "#EF4444"
+        : "#21C16B";
+
+  return (
     <SafeAreaView style={styles.safe} edges={["top"]}>
-      {/* ── HEADER ────────────────────────────────────────────────────────── */}
+      {/* ── HEADER ──────────────────────────────────────────────────────── */}
       <View style={styles.header}>
         <TouchableOpacity
-          onPress={() => router.back()}
+          onPress={handleEndCall}
           style={styles.backBtn}
           activeOpacity={0.7}
         >
@@ -114,8 +508,10 @@ export default function LessonScreen() {
         <View style={styles.headerMid}>
           <Text style={styles.headerTitle}>AI Teacher</Text>
           <View style={styles.onlineRow}>
-            <View style={styles.onlineDot} />
-            <Text style={styles.onlineLabel}>Online</Text>
+            <View style={[styles.onlineDot, { backgroundColor: dotColor }]} />
+            <Text style={[styles.onlineLabel, { color: dotColor }]}>
+              {statusLabel}
+            </Text>
           </View>
         </View>
 
@@ -132,85 +528,27 @@ export default function LessonScreen() {
         </View>
       </View>
 
-      <ScrollView
-        showsVerticalScrollIndicator={false}
-        contentContainerStyle={styles.scroll}
-      >
-        {/* ── TEACHER VIEW ──────────────────────────────────────────────── */}
-        <View style={[styles.teacherArea, { width: teacherAreaWidth }]}>
-          {/* AI teacher mascot */}
-          <Image
-            source={images.mascotWelcome}
-            style={styles.mascotImage}
-            resizeMode="contain"
+      {/* ── CALL CONTENT ────────────────────────────────────────────────── */}
+      {call ? (
+        <StreamCall call={call}>
+          <LessonCallUI
+            lesson={lesson}
+            phase={phase}
+            error={error}
+            agentStatus={agentStatus}
+            onEndCall={handleEndCall}
+            userName={userName}
+            userImage={userImage}
+            screenWidth={screenWidth}
           />
-
-          {/* Speech bubble */}
-          <View style={styles.bubble}>
-            <View style={styles.bubbleTextWrap}>
-              <Text style={styles.bubblePrimaryText}>{bubblePrimary}</Text>
-              <Text style={styles.bubbleSecondaryText}>
-                {bubbleSecondary} 👏
-              </Text>
-            </View>
-            <TouchableOpacity activeOpacity={0.7}>
-              <Ionicons name="volume-high" size={24} color="#6C4EF5" />
-            </TouchableOpacity>
-          </View>
+        </StreamCall>
+      ) : (
+        /* Before the call object is created (client/user not ready yet) */
+        <View style={styles.loadingContainer}>
+          <ActivityIndicator size="large" color="#6C4EF5" />
+          <Text style={styles.loadingText}>Preparing lesson...</Text>
         </View>
-
-        {/* ── CONTROLS ──────────────────────────────────────────────────── */}
-        <View style={styles.controlsRow}>
-          <ControlButton
-            icon={
-              <Ionicons name="videocam" size={22} color="#FFFFFF" />
-            }
-            label="Camera"
-            active={cameraActive}
-            onPress={() => setCameraActive(!cameraActive)}
-          />
-          <ControlButton
-            icon={<Ionicons name="mic" size={22} color="#FFFFFF" />}
-            label="Mic"
-            active={micActive}
-            onPress={() => setMicActive(!micActive)}
-          />
-          <ControlButton
-            icon={
-              <MaterialCommunityIcons
-                name="translate"
-                size={22}
-                color="#FFFFFF"
-              />
-            }
-            label="Subtitles"
-            active={subtitlesActive}
-            onPress={() => setSubtitlesActive(!subtitlesActive)}
-          />
-          <ControlButton
-            icon={
-              <Ionicons
-                name="call"
-                size={22}
-                color="#FFFFFF"
-                style={styles.hangupIcon}
-              />
-            }
-            label="End Call"
-            endCall
-            onPress={() => router.back()}
-          />
-        </View>
-
-        {/* ── FEEDBACK CARD ─────────────────────────────────────────────── */}
-        <View style={styles.feedbackCard}>
-          <FeedbackItem label="Speaking" value="Excellent" color="#21C16B" />
-          <View style={styles.feedbackDivider} />
-          <FeedbackItem label="Pronunciation" value="Great" color="#6C4EF5" />
-          <View style={styles.feedbackDivider} />
-          <FeedbackItem label="Grammar" value="Good" color="#6C4EF5" />
-        </View>
-      </ScrollView>
+      )}
     </SafeAreaView>
   );
 }
@@ -258,12 +596,10 @@ const styles = StyleSheet.create({
     width: 8,
     height: 8,
     borderRadius: 4,
-    backgroundColor: "#21C16B",
   },
   onlineLabel: {
     fontFamily: "Poppins_400Regular",
     fontSize: 13,
-    color: "#21C16B",
   },
   headerIcons: {
     flexDirection: "row",
@@ -286,6 +622,19 @@ const styles = StyleSheet.create({
     color: "#0D132B",
   },
 
+  // ── Loading (before call object exists)
+  loadingContainer: {
+    flex: 1,
+    alignItems: "center",
+    justifyContent: "center",
+    gap: 16,
+  },
+  loadingText: {
+    fontFamily: "Poppins_400Regular",
+    fontSize: 15,
+    color: "#6B7280",
+  },
+
   // ── Teacher area
   teacherArea: {
     height: 420,
@@ -302,6 +651,30 @@ const styles = StyleSheet.create({
     width: "100%",
     height: 300,
   },
+
+  // ── Agent status badge
+  agentBadge: {
+    position: "absolute",
+    top: 12,
+    right: 12,
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 6,
+    backgroundColor: "rgba(255,255,255,0.92)",
+    paddingHorizontal: 10,
+    paddingVertical: 6,
+    borderRadius: 12,
+  },
+  agentBadgeDot: {
+    width: 8,
+    height: 8,
+    borderRadius: 4,
+  },
+  agentBadgeText: {
+    fontFamily: "Poppins_500Medium",
+    fontSize: 11,
+  },
+
   bubble: {
     position: "absolute",
     bottom: 14,
@@ -328,6 +701,76 @@ const styles = StyleSheet.create({
     marginTop: 2,
   },
 
+  // ── Overlays
+  overlay: {
+    ...StyleSheet.absoluteFillObject,
+    backgroundColor: "rgba(232, 224, 255, 0.88)",
+    alignItems: "center",
+    justifyContent: "center",
+    gap: 12,
+    borderRadius: 24,
+  },
+  overlayText: {
+    fontFamily: "Poppins_500Medium",
+    fontSize: 15,
+    color: "#6C4EF5",
+  },
+  overlayErrorText: {
+    fontFamily: "Poppins_600SemiBold",
+    fontSize: 15,
+    color: "#EF4444",
+    textAlign: "center",
+    paddingHorizontal: 20,
+  },
+  overlaySubText: {
+    fontFamily: "Poppins_400Regular",
+    fontSize: 13,
+    color: "#6B7280",
+  },
+
+  // ── User info row
+  userRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 10,
+    alignSelf: "flex-start",
+    paddingHorizontal: 4,
+  },
+  userAvatarCircle: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    backgroundColor: "#EDE9FF",
+    alignItems: "center",
+    justifyContent: "center",
+    overflow: "hidden",
+  },
+  userAvatarImage: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+  },
+  userNameText: {
+    fontFamily: "Poppins_600SemiBold",
+    fontSize: 14,
+    color: "#0D132B",
+    maxWidth: 200,
+  },
+  userStatusRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 5,
+  },
+  statusDot: {
+    width: 7,
+    height: 7,
+    borderRadius: 3.5,
+  },
+  userStatusText: {
+    fontFamily: "Poppins_400Regular",
+    fontSize: 12,
+  },
+
   // ── Controls
   controlsRow: {
     flexDirection: "row",
@@ -351,6 +794,9 @@ const styles = StyleSheet.create({
   },
   controlInactive: {
     backgroundColor: "#4B5563",
+  },
+  controlDisabled: {
+    opacity: 0.4,
   },
   controlEnd: {
     backgroundColor: "#EF4444",

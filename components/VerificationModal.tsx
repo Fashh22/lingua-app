@@ -1,4 +1,4 @@
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import {
     KeyboardAvoidingView,
     Modal,
@@ -26,6 +26,14 @@ export default function VerificationModal({
   const [code, setCode] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const inputRef = useRef<TextInput>(null);
+
+  // autoFocus is unreliable inside a Modal due to animation timing —
+  // manually focus after the slide-up animation completes (~300ms).
+  useEffect(() => {
+    if (!visible) return;
+    const t = setTimeout(() => inputRef.current?.focus(), 350);
+    return () => clearTimeout(t);
+  }, [visible]);
 
   async function handleCodeChange(value: string) {
     if (isLoading) return;
@@ -112,8 +120,9 @@ export default function VerificationModal({
             onChangeText={handleCodeChange}
             keyboardType="number-pad"
             maxLength={6}
-            autoFocus
             editable={!isLoading}
+            caretHidden
+            showSoftInputOnFocus
             style={styles.hiddenInput}
           />
         </View>
@@ -177,8 +186,11 @@ const styles = StyleSheet.create({
   },
   hiddenInput: {
     position: "absolute",
+    bottom: 0,
+    left: 0,
+    width: 1,
+    height: 1,
     opacity: 0,
-    width: 0,
-    height: 0,
+    color: "transparent",
   },
 });
